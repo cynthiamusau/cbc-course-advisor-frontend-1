@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - CBC Course Advisor{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in mb-8" style="background: var(--primary-light); border: none;">
+  <h1 style="color: var(--primary);">Student Dashboard</h1>
+  <p class="mt-2 text-muted" style="font-size: 1.125rem;">
+     Welcome back, <strong style="color: var(--text-main);">{{ learner.name }}</strong>
+  </p>
+</div>
+
+<div class="grid grid-3 animate-fade-in" style="animation-delay: 0.1s;">
+  <div class="card card-hover">
+     <h3 class="mb-4" style="border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; display: inline-block;">Profile</h3>
+     <div class="flex-col gap-2" style="font-size: 0.95rem; color: var(--text-muted);">
+        <p><strong style="color: var(--text-main);">Grade:</strong> <span class="badge badge-primary">{{ learner.grade }}</span></p>
+        <p><strong style="color: var(--text-main);">Admission:</strong> {{ learner.admission_number }}</p>
+        <p><strong style="color: var(--text-main);">Learning Style:</strong> {{ learner.learning_style }}</p>
+     </div>
+  </div>
+
+  <div class="card card-hover">
+     <h3 class="mb-2" style="border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; display: inline-block;">Competencies</h3>
+     <div style="font-size: 0.95rem;">
+        <p class="text-muted mb-2">{{ learner.competencies|length }} subject areas verified</p>
+        <div class="flex-col gap-2">
+           {% for comp in learner.competencies[:3] %}
+           <div>
+             <strong style="color: var(--text-main);">{{ comp.area }}:</strong> 
+             <span style="float: right; color: var(--primary); font-weight: 600;">{{ comp.level }}</span>
+           </div>
+           {% endfor %}
+        </div>
+     </div>
+  </div>
+
+  <div class="card card-hover">
+     <h3 class="mb-2" style="border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; display: inline-block;">Interests</h3>
+     <div style="font-size: 0.95rem;">
+       <p class="text-muted mb-2">{{ learner.interests|length }} core interests tracked</p>
+       <div class="flex-col gap-2">
+          {% for interest in learner.interests[:3] %}
+          <div>
+             <strong style="color: var(--text-main);">{{ interest.area }}:</strong> 
+             <span style="float: right; color: var(--warning); font-weight: 600;">{{ interest.level }}/5</span>
+          </div>
+          {% endfor %}
+       </div>
+     </div>
+  </div>
+</div>
+
+{% if recommendations %}
+<h2 class="mt-8 mb-4">Your Top Recommendations</h2>
+
+<div class="grid grid-3 mb-8 animate-fade-in" style="animation-delay: 0.2s;">
+  <div class="card" style="background: var(--success-bg); border-color: rgba(16, 185, 129, 0.2);">
+     <h3 class="mb-2" style="font-size: 1.125rem; color: #047857;">Top Strengths</h3>
+     <div class="flex flex-wrap gap-2 mt-2">
+        {% for strength in recommendations.top_strengths %}
+        <span class="badge" style="background: white; color: #047857;">{{ strength }}</span>
+        {% endfor %}
+     </div>
+  </div>
+
+  <div class="card" style="background: var(--warning-bg); border-color: rgba(245, 158, 11, 0.2);">
+    <h3 class="mb-2" style="font-size: 1.125rem; color: #B45309;">Areas to Improve</h3>
+    <div class="flex flex-wrap gap-2 mt-2">
+       {% for area in recommendations.areas_for_improvement %}
+       <span class="badge" style="background: white; color: #B45309;">{{ area }}</span>
+       {% endfor %}
+    </div>
+  </div>
+
+  <div class="card" style="background: #F8FAFC; border-color: #E2E8F0;">
+     <h3 class="mb-2" style="font-size: 1.125rem; color: var(--text-main);">Suggested Career Paths</h3>
+     <div class="flex flex-wrap gap-2 mt-2">
+       {% for career in recommendations.career_suggestions[:3] %}
+       <span class="badge badge-primary">{{ career }}</span>
+       {% endfor %}
+     </div>
+  </div>
+</div>
+
+<div class="animate-fade-in" style="animation-delay: 0.3s;">
+   {% for rec in recommendations.recommendations[:5] %}
+   <div class="card card-hover mb-4" style="cursor: pointer;" onclick="window.location='/recommendations/{{ learner.id }}'">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-4 items-center flex-1">
+           <div class="badge-primary flex items-center justify-center p-0" style="width: 3rem; height: 3rem; border-radius: 50%; font-size: 1.25rem; font-weight: 700;">
+              {{ loop.index }}
+           </div>
+           <div>
+              <h3 class="mb-1">{{ rec.course.name }}</h3>
+              <p class="text-muted" style="font-size: 0.875rem;">
+                  <span style="font-weight: 600; color: var(--text-main);">{{ rec.course.code }}</span> • {{ rec.course.subject_area }}
+              </p>
+              <p class="mt-2" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">
+                 {{ rec.reasons[0] }}
+              </p>
+           </div>
+        </div>
+        <div class="text-center" style="min-width: 100px;">
+           <div style="font-size: 2.5rem; font-weight: 800; color: var(--success); line-height: 1;">{{ rec.match_score }}<span style="font-size: 1.5rem;">%</span></div>
+           <span class="badge mt-2 {% if rec.match_score >= 85 %}badge-success{% elif rec.match_score >= 70 %}badge-primary{% else %}badge-warning{% endif %}">
+              {% if rec.match_score >= 85 %}Excellent{% elif rec.match_score >= 70 %}Good{% else %}Fair{% endif %} Match
+           </span>
+        </div>
+      </div>
+   </div>
+   {% endfor %}
+
+   <div class="text-center mt-8">
+     <a href="/recommendations/{{ learner.id }}" class="btn btn-primary shadow-md">View All Comprehensive Recommendations</a>
+   </div>
+</div>
+
+{% else %}
+<div class="card text-center py-8 animate-fade-in">
+  <div style="font-size: 4rem; margin-bottom: 1rem;">🎯</div>
+  <h2 class="mb-2">No Recommendations Yet</h2>
+  <p class="text-muted mb-8" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+     Our AI needs more data to provide personalized course recommendations. Complete the full assessment to unlock your future.
+  </p>
+  <a href="/assessment" class="btn btn-primary">Take Assessment</a>
+</div>
+{% endif %}
+
+{% if learner.academic_performance %}
+<h2 class="mt-8 mb-4">Academic Performance History</h2>
+<div class="table-wrapper animate-fade-in mb-8" style="animation-delay: 0.4s;">
+  <table>
+    <thead>
+      <tr>
+        <th>Subject / Term</th>
+        <th class="text-center">Score</th>
+        <th class="text-center">Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for perf in learner.academic_performance %}
+      <tr>
+         <td>
+            <div style="font-weight: 600; color: var(--text-main);">{{ perf.subject }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">{{ perf.term }}</div>
+         </td>
+         <td class="text-center" style="font-weight: 600; color: var(--primary);">{{ perf.score }}%</td>
+         <td class="text-center"><span class="badge badge-success">{{ perf.grade }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="flex flex-wrap justify-center gap-4 mt-8 pt-8 border-t border-gray-200">
+  <a href="/courses" class="btn btn-secondary">Browse Course Catalog</a>
+  <a href="/assessment" class="btn btn-primary">Retake Assessment</a>
+</div>
+{% endblock %}

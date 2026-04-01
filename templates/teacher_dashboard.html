@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard - CBC Course Advisor{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in mb-8">
+  <h1>Teacher Dashboard</h1>
+  <p class="text-muted mt-2">
+     Monitor and manage student progress and overall completion rates.
+  </p>
+
+  <div class="grid grid-3 mt-8">
+    <div class="card card-hover text-center" style="background: var(--primary-light); border: 1px solid rgba(79, 70, 229, 0.1);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">{{ total_learners }}</div>
+        <div style="color: var(--primary-hover); font-weight: 500;">Total Students</div>
+    </div>
+
+     <div class="card card-hover text-center" style="background: var(--success-bg); border: 1px solid rgba(16, 185, 129, 0.1);">
+       <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">{{ total_courses }}</div>
+       <div style="color: #047857; font-weight: 500;">Available Courses</div>
+     </div>
+
+     <div class="card card-hover text-center" style="background: var(--warning-bg); border: 1px solid rgba(245, 158, 11, 0.1);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--warning);">
+          {% if total_learners > 0 %}{{ (learners|length / total_learners * 100)|round|int }}%{% else %}0%{% endif %}
+        </div>
+        <div style="color: #B45309; font-weight: 500;">Completion Rate</div>
+     </div>
+   </div>
+</div>
+
+<h2 class="mb-4">Student Profiles</h2>
+
+{% if not subjects_data %}
+<div class="card text-center py-8">
+  <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+  <h3 class="mb-2">No Subject Records Found</h3>
+  <p class="text-muted">
+      Student subjects will appear here as unique tables after they complete assessments.
+  </p>
+</div>
+{% else %}
+  {% for subject, records in subjects_data.items() %}
+  <h3 class="mt-8 mb-4">{{ subject }}</h3>
+  <div class="card mb-8 animate-fade-in" style="animation-delay: 0.1s; padding: 0; overflow: hidden;">
+    <div class="table-wrapper" style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead style="background-color: var(--primary-light);">
+          <tr>
+            <th style="padding: 1rem;">Student Name</th>
+            <th style="padding: 1rem;">Admission Number</th>
+            <th style="padding: 1rem;">Percentage</th>
+            <th style="padding: 1rem;">Grading</th>
+            <th style="padding: 1rem; text-align: center;">Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in records %}
+          <tr style="border-bottom: 1px solid #E2E8F0;">
+            <td style="padding: 1rem; font-weight: 600; color: var(--text-main);">{{ record.learner.name }}</td>
+            <td style="padding: 1rem; color: var(--text-muted);">{{ record.learner.admission_number }}</td>
+            <td style="padding: 1rem;">{{ record.perf.score }}%</td>
+            <td style="padding: 1rem;">
+                <span class="badge badge-primary">{{ record.perf.grade }}</span>
+            </td>
+            <td style="padding: 1rem; text-align: center;">
+               <a href="/recommendations/{{ record.learner.id }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.875rem;">View Recommendation</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card mb-8 animate-fade-in" style="background: var(--primary-light); animation-delay: 0.2s;">
+  <h3 class="mb-4">Teacher Insights</h3>
+  <div class="grid grid-2">
+     <div>
+       <h4 class="mb-2" style="color: var(--primary);">How to Use This Dashboard</h4>
+       <ul style="padding-left: 1.5rem; color: var(--text-muted);">
+          <li class="mb-1">Monitor student assessment completion</li>
+          <li class="mb-1">Review individual student competencies and interests</li>
+          <li class="mb-1">View AI-generated course recommendations</li>
+          <li class="mb-1">Identify class-wide trends and patterns</li>
+       </ul>
+     </div>
+     <div>
+       <h4 class="mb-2" style="color: var(--primary);">Recommendation Algorithm</h4>
+       <ul style="padding-left: 1.5rem; color: var(--text-muted);">
+          <li class="mb-1"><strong>35%</strong> — Competency level matching</li>
+          <li class="mb-1"><strong>25%</strong> — Interest alignment</li>
+          <li class="mb-1"><strong>25%</strong> — Academic performance</li>
+          <li class="mb-1"><strong>15%</strong> — Career path alignment</li>
+       </ul>
+     </div>
+  </div>
+</div>
+{% endblock %}

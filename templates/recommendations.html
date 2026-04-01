@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations - CBC Course Advisor{% endblock %}
+
+{% block extra_css %}
+<style>
+  .recommendation-card {
+     border-left: 4px solid var(--primary);
+     margin-bottom: 1.5rem;
+     padding: 2rem;
+  }
+
+  .match-score {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .match-breakdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  
+  @media (max-width: 768px) {
+    .match-breakdown { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .match-item {
+    text-align: center;
+    padding: 1rem;
+    background: #F8FAFC;
+    border-radius: var(--radius-md);
+    border: 1px solid #E2E8F0;
+  }
+
+  .rank-badge {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     width: 3rem;
+     height: 3rem;
+     background: var(--primary);
+     color: white;
+     border-radius: 50%;
+     font-weight: 700;
+     font-size: 1.25rem;
+     box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in" style="background: var(--primary-light); border: none;">
+  <h1 style="color: var(--primary);">Your Course Recommendations</h1>
+  <p class="mt-2 text-muted" style="font-size: 1.125rem;">
+     Personalized, AI-driven suggestions tailored exclusively for <strong style="color: var(--text-main);">{{ learner.name }}</strong>
+  </p>
+
+  <div class="grid grid-3 mt-8">
+    <div class="card card-hover" style="background: var(--success-bg); border-color: rgba(16, 185, 129, 0.2);">
+       <h3 class="mb-2" style="font-size: 1.125rem; color: #047857;">Top Strengths</h3>
+       <div class="flex flex-wrap gap-2 mt-2">
+          {% for strength in recommendations.top_strengths %}
+          <span class="badge" style="background: white; color: #047857;">{{ strength }}</span>
+          {% endfor %}
+       </div>
+    </div>
+
+    <div class="card card-hover" style="background: var(--warning-bg); border-color: rgba(245, 158, 11, 0.2);">
+      <h3 class="mb-2" style="font-size: 1.125rem; color: #B45309;">Areas to Develop</h3>
+      <div class="flex flex-wrap gap-2 mt-2">
+         {% for area in recommendations.areas_for_improvement %}
+         <span class="badge" style="background: white; color: #B45309;">{{ area }}</span>
+          {% endfor %}
+       </div>
+     </div>
+
+     <div class="card card-hover" style="background: white;">
+       <h3 class="mb-2" style="font-size: 1.125rem;">Aligned Career Paths</h3>
+       <div class="flex flex-wrap gap-2 mt-2">
+          {% for career in recommendations.career_suggestions[:3] %}
+          <span class="badge badge-primary">{{ career }}</span>
+          {% endfor %}
+       </div>
+     </div>
+  </div>
+</div>
+
+<h2 class="mt-8 mb-6">Highest Ranked AI Recommendations</h2>
+
+{% for rec in recommendations.recommendations %}
+<div class="card card-hover recommendation-card animate-fade-in" style="animation-delay: 0.{{ loop.index }}s;">
+  <div class="flex justify-between items-start mb-4 flex-wrap gap-4">
+     <div class="flex items-start gap-4 flex-1">
+        <span class="rank-badge">{{ loop.index }}</span>
+        <div>
+          <h2 class="mb-1" style="font-size: 1.75rem; color: var(--text-main);">{{ rec.course.name }}</h2>
+          <p class="text-muted" style="font-size: 0.95rem; font-weight: 500;">
+              <span style="color: var(--primary);">{{ rec.course.code }}</span> • {{ rec.course.subject_area }} • <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.1rem 0.5rem;">{{ rec.course.level }}</span>
+          </p>
+          <p class="text-muted mt-2" style="line-height: 1.5; font-size: 0.95rem;">{{ rec.course.description }}</p>
+        </div>
+     </div>
+     <div class="text-center" style="min-width: 140px;">
+        <div class="match-score">{{ rec.match_score }}<span style="font-size: 1.5rem;">%</span></div>
+        <span class="badge mt-2 {% if rec.match_score >= 85 %}badge-success{% elif rec.match_score >= 70 %}badge-primary{% else %}badge-warning{% endif %}" style="padding: 0.5rem 1rem;">
+          {% if rec.match_score >= 85 %}Excellent Match
+          {% elif rec.match_score >= 70 %}Good Match
+          {% else %}Fair Match{% endif %}
+        </span>
+     </div>
+  </div>
+
+  <div class="match-breakdown">
+    <div class="match-item">
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">{{ rec.competency_match }}%</div>
+        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Competency</div>
+     </div>
+     <div class="match-item">
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--success);">{{ rec.interest_match }}%</div>
+        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Interest</div>
+     </div>
+     <div class="match-item">
+        <div style="font-size: 1.25rem; font-weight: 700; color: #7c3aed;">{{ rec.performance_match }}%</div>
+        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Performance</div>
+     </div>
+     <div class="match-item">
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--warning);">{{ rec.career_alignment }}%</div>
+        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Career</div>
+     </div>
+  </div>
+
+  <div class="mt-6 mb-4">
+    <h3 class="mb-2" style="font-size: 1.125rem;">Why is this recommended?</h3>
+    <ul style="padding-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+       {% for reason in rec.reasons %}
+       <li><strong style="color: var(--text-main);">✓</strong> {{ reason }}</li>
+       {% endfor %}
+    </ul>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mt-6 pt-6" style="border-top: 1px solid #E2E8F0;">
+    <span class="badge" style="background: white; border: 1px solid #E2E8F0;">{{ rec.course.credits }} Credits</span>
+    <span class="badge" style="background: white; border: 1px solid #E2E8F0;">{{ rec.course.duration }}</span>
+    {% for skill in rec.course.skills[:3] %}
+    <span class="badge" style="background: var(--primary-light); color: var(--primary);">{{ skill }}</span>
+    {% endfor %}
+  </div>
+
+  {% if rec.course.career_paths %}
+  <div class="mt-6">
+    <strong style="font-size: 0.875rem; text-transform: uppercase; color: var(--text-muted);">Career Opportunities</strong>
+    <div class="flex flex-wrap gap-2 mt-2">
+        {% for career in rec.course.career_paths[:4] %}
+       <span class="badge badge-warning">{{ career }}</span>
+       {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if rec.course.prerequisites %}
+  <div class="mt-6 p-4" style="background: var(--warning-bg); border-radius: var(--radius-sm); border: 1px solid rgba(245, 158, 11, 0.2);">
+     <strong style="color: #B45309; font-size: 0.875rem; text-transform: uppercase;">Prerequisites:</strong> 
+     <span style="color: #92400E; font-size: 0.95rem; margin-left: 0.5rem;">{{ rec.course.prerequisites|join(', ') }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="card text-center mt-8 animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border: none; padding: 4rem 2rem;">
+  <h2 class="mb-4" style="color: white;">Empower Your Academic Journey</h2>
+  <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; font-size: 1.125rem;">
+     These recommendations represent the clearest pathway to maximizing your potential. Discuss these insights with educators to map out your personalized educational track.
+  </p>
+  <div class="flex flex-wrap justify-center gap-4">
+     <a href="/courses" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Browse All Courses</a>
+     <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Retake Assessment</a>
+     <a href="/student/{{ learner.id }}" class="btn" style="background: white; color: var(--primary);">View Dashboard</a>
+  </div>
+</div>
+{% endblock %}

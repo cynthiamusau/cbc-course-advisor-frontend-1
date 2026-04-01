@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Home - CBC Course Advisor{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+  
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar-nav card animate-fade-in" style="flex: 1; min-width: 250px; max-width: 300px; padding: 1.5rem; position: sticky; top: 100px;">
+    <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Quick Links</h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <a href="/" class="btn" style="background: var(--primary-light); color: var(--primary); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">🏠</span> Home
+      </a>
+      <a href="/student/login" class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">🧑‍🎓</span> Student Login
+      </a>
+      <a href="/assessment" class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">📋</span> Take Assessment
+      </a>
+      <a href="/courses" class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">📚</span> Browse Courses
+      </a>
+      <a href="/teacher/login" class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">👨‍🏫</span> Teacher Portal
+      </a>
+      <a href="/admin/login" class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-align: left; padding: 1rem; display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;">
+        <span style="font-size: 1.5rem;">🛡️</span> Admin Portal
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div style="flex: 3; min-width: 300px;">
+    <div class="card animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; text-align: center; padding: 4rem 2rem; border-radius: 1rem; margin-bottom: 4rem; border: none; box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.2);">
+      <h1 style="color: white; font-size: 3rem; margin-bottom: 1rem;">AI-Based CBC Course Advisor</h1>
+      <p style="color: rgba(255,255,255,0.9); font-size: 1.25rem; max-width: 600px; margin: 0 auto 2rem auto;">
+        Intelligent course recommendations powered by machine learning algorithms tailored for the CBC curriculum.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+         <a href="/student/login" class="btn" style="background: white; color: var(--primary);">Student Login</a>
+         <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Take Assessment</a>
+         <a href="/courses" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Browse Courses</a>
+      </div>
+    </div>
+
+    <section class="mb-8">
+      <div class="text-center mb-8">
+        <h2>How It Works</h2>
+        <p class="text-muted mt-2">Our recommendation engine analyzes multiple data points to find your perfect courses.</p>
+      </div>
+      
+      <div class="grid grid-3">
+        <div class="card card-hover text-center">
+           <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+           <h3 class="mb-1">Competency Analysis</h3>
+           <p class="text-muted">Evaluates your skill levels across different subject areas from Beginner to Expert.</p>
+        </div>
+
+        <div class="card card-hover text-center">
+           <div style="font-size: 3rem; margin-bottom: 1rem;">💡</div>
+           <h3 class="mb-1">Interest Matching</h3>
+           <p class="text-muted">Aligns courses with your personal interests and passions across 8 areas.</p>
+        </div>
+
+         <div class="card card-hover text-center">
+           <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+           <h3 class="mb-1">Performance Stats</h3>
+           <p class="text-muted">Analyzes your academic performance history to recommend where you'll excel.</p>
+        </div>
+
+        <div class="card card-hover text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">💼</div>
+          <h3 class="mb-1">Career Alignment</h3>
+          <p class="text-muted">Connects courses with your career aspirations and long-term future goals.</p>
+        </div>
+
+        <div class="card card-hover text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍🏫</div>
+          <h3 class="mb-1">Teacher Dashboard</h3>
+          <p class="text-muted">Tools for educators to guide students effectively with data-driven AI insights.</p>
+        </div>
+
+         <div class="card card-hover text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+            <h3 class="mb-1">Course Catalog</h3>
+            <p class="text-muted">Browse the complete catalog of CBC courses with detailed prerequisites.</p>
+         </div>
+      </div>
+    </section>
+
+    <div class="card mb-8" style="background: var(--warning-bg); border-left: 4px solid var(--warning); border-radius: 0 0.5rem 0.5rem 0;">
+      <h2 class="mb-4">The Problem We Solve</h2>
+      <div class="grid grid-2 mb-4">
+         <div>
+            <h3 class="mb-2">For Students</h3>
+            <ul style="padding-left: 1.5rem; color: var(--text-muted);">
+              <li class="mb-1">Difficulty choosing courses that match competencies</li>
+              <li class="mb-1">Limited personalized guidance</li>
+              <li class="mb-1">Uncertainty about career-course alignment</li>
+              <li class="mb-1">No data-driven decision support</li>
+            </ul>
+         </div>
+         <div>
+            <h3 class="mb-2">For Teachers</h3>
+            <ul style="padding-left: 1.5rem; color: var(--text-muted);">
+              <li class="mb-1">Large class sizes prevent individualized advice</li>
+              <li class="mb-1">Limited time for each student</li>
+              <li class="mb-1">Difficulty tracking student progress holistically</li>
+              <li class="mb-1">Need for actionable insights based on data</li>
+            </ul>
+         </div>
+      </div>
+      <div class="card border-none" style="margin-top: 1rem; box-shadow: none; border: 1px solid rgba(0,0,0,0.05);">
+         <h3 class="mb-2">Our Solution</h3>
+         <p class="text-muted">An intelligent AI-based system that automatically analyzes learner data to recommend the most suitable CBC courses.</p>
+      </div>
+    </div>
+
+    <div class="card text-center mb-8 animate-fade-in" style="background: var(--primary-light); border: 1px solid rgba(79, 70, 229, 0.1);">
+      <h2 class="mb-2" style="color: var(--primary);">Ready to Get Started?</h2>
+      <p class="mb-4 text-muted" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+         Take our assessment to receive personalized recommendations based on your unique profile.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="/student/login" class="btn btn-secondary">Student Login</a>
+        <a href="/assessment" class="btn btn-primary">Start Assessment</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

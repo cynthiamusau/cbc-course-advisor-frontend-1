@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Student Login - CBC Course Advisor{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 4rem auto;">
+  <div class="card animate-fade-in" style="padding: 3rem 2rem;">
+    <div class="text-center mb-6">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🧑‍🎓</div>
+      <h2>Student Portal</h2>
+      <p class="mt-2 text-muted">Access your personalized learning path</p>
+    </div>
+    
+    <div id="errorAlert" style="display: none; background: var(--danger-bg); color: var(--danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; text-align: center; font-weight: 500;">
+    </div>
+
+    <form id="loginForm">
+       <div class="form-group mb-4">
+          <label for="admissionNumber">Admission Number</label>
+          <input type="text" id="admissionNumber" placeholder="e.g., ADM123456" required>
+       </div>
+       
+       <button type="submit" class="btn btn-primary shadow-md" style="width: 100%;">Secure Login</button>
+    </form>
+    
+    <div class="text-center mt-6 pt-6" style="border-top: 1px solid #E2E8F0;">
+      <p class="text-muted mb-4" style="font-size: 0.875rem;">Don't have a profile verified yet?</p>
+      <a href="/assessment" class="btn btn-secondary" style="width: 100%;">Take Placement Assessment</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+   e.preventDefault();
+   
+   const admissionNumber = document.getElementById('admissionNumber').value;
+   const errorAlert = document.getElementById('errorAlert');
+   
+   try {
+      const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+             'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ admissionNumber: admissionNumber })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+          // Redirect to student dashboard
+          window.location.href = `/student/${result.learnerId}`;
+      } else {
+          errorAlert.textContent = result.error;
+          errorAlert.style.display = 'block';
+      }
+   } catch (error) {
+      errorAlert.textContent = 'Error connecting to server: ' + error.message;
+      errorAlert.style.display = 'block';
+   }
+});
+</script>
+{% endblock %}
