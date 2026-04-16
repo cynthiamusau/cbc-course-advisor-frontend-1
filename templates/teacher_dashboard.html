@@ -2,100 +2,309 @@
 
 {% block title %}Teacher Dashboard - CBC Course Advisor{% endblock %}
 
+{% block extra_css %}
+<style>
+  .modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #cbd5e1; /* visible outer border */
+    border-radius: 8px;
+    background-color: white;
+  }
+  .modern-table th, .modern-table td {
+    border-right: 1px solid #cbd5e1; /* visible column borders */
+    border-bottom: 1px solid #cbd5e1; /* visible row borders */
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  .modern-table th {
+    background-color: var(--primary-light);
+    color: var(--primary-hover);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+  .modern-table tr:last-child td {
+    border-bottom: none;
+  }
+  .modern-table th:last-child, .modern-table td:last-child {
+    border-right: none;
+  }
+  .modern-table tbody tr:hover {
+    background-color: #F8FAFC;
+    transition: background-color 0.2s ease;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card animate-fade-in mb-8">
-  <h1>Teacher Dashboard</h1>
-  <p class="text-muted mt-2">
-     Monitor and manage student progress and overall completion rates.
-  </p>
-
-  <div class="grid grid-3 mt-8">
-    <div class="card card-hover text-center" style="background: var(--primary-light); border: 1px solid rgba(79, 70, 229, 0.1);">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">{{ total_learners }}</div>
-        <div style="color: var(--primary-hover); font-weight: 500;">Total Students</div>
+<div class="home-layout">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar-nav card animate-fade-in" style="position: sticky; top: 100px;">
+    <div class="text-center mb-6">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">👨‍🏫</div>
+      <h3 style="font-size: 1.25rem;">{{ teacher.username if teacher else 'Teacher' }}</h3>
+      <p style="font-weight: 700; color: var(--primary); margin: 0.25rem 0; font-size: 0.9rem;">
+        {{ school.name if school else 'No School' }}
+      </p>
+      <p class="text-muted" style="font-size: 0.75rem;">Grade Educator &bull; {{ school.code if school else 'N/A' }}</p>
     </div>
 
-     <div class="card card-hover text-center" style="background: var(--success-bg); border: 1px solid rgba(16, 185, 129, 0.1);">
-       <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">{{ total_courses }}</div>
-       <div style="color: #047857; font-weight: 500;">Available Courses</div>
-     </div>
+    <!-- QUICK STATS -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem;">
+      <div class="card" style="padding: 1rem; text-align: center; background: var(--primary-light); border: none;">
+        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">{{ total_learners }}</div>
+        <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--primary-hover);">Students</div>
+      </div>
+      <div class="card" style="padding: 1rem; text-align: center; background: var(--success-bg); border: none;">
+        <div style="font-size: 1.5rem; font-weight: 800; color: var(--success);">{{ total_courses }}</div>
+        <div style="font-size: 0.65rem; text-transform: uppercase; color: #047857;">Courses</div>
+      </div>
+    </div>
 
-     <div class="card card-hover text-center" style="background: var(--warning-bg); border: 1px solid rgba(245, 158, 11, 0.1);">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--warning);">
-          {% if total_learners > 0 %}{{ (learners|length / total_learners * 100)|round|int }}%{% else %}0%{% endif %}
+    <!-- NAVIGATION LINKS -->
+    <nav style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem;">
+      <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Dashboard Sections</h4>
+      <a href="#my-classes" class="btn" style="background: transparent; color: var(--text-main); justify-content: flex-start; padding: 0.75rem 1rem; font-size: 0.95rem; border: 1px solid #E2E8F0;">
+        <span style="font-size: 1.25rem;">🏫</span> My Classes
+      </a>
+      <a href="#subject-profiles" class="btn" style="background: transparent; color: var(--text-main); justify-content: flex-start; padding: 0.75rem 1rem; font-size: 0.95rem; border: 1px solid #E2E8F0;">
+        <span style="font-size: 1.25rem;">📚</span> Subject Profiles
+      </a>
+      <a href="#insights" class="btn" style="background: transparent; color: var(--text-main); justify-content: flex-start; padding: 0.75rem 1rem; font-size: 0.95rem; border: 1px solid #E2E8F0;">
+        <span style="font-size: 1.25rem;">💡</span> AI Insights
+      </a>
+    </nav>
+
+    <!-- DYNAMIC: LAST ASSESSMENT -->
+    <div style="margin-bottom: 2rem;">
+      <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Recent Activity</h4>
+      {% if learners %}
+        {% set last_learner = learners | sort(attribute='created_at', reverse=True) | first %}
+        <div class="card" style="padding: 1rem; background: #F8FAFC; border: 1px solid #E2E8F0;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Last Assessment:</p>
+          <div style="font-weight: 700; color: var(--primary);">{{ last_learner.name }}</div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+            {{ last_learner.grade }} &bull; Recently
+          </p>
         </div>
-        <div style="color: #B45309; font-weight: 500;">Completion Rate</div>
-     </div>
-   </div>
-</div>
-
-<h2 class="mb-4">Student Profiles</h2>
-
-{% if not subjects_data %}
-<div class="card text-center py-8">
-  <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
-  <h3 class="mb-2">No Subject Records Found</h3>
-  <p class="text-muted">
-      Student subjects will appear here as unique tables after they complete assessments.
-  </p>
-</div>
-{% else %}
-  {% for subject, records in subjects_data.items() %}
-  <h3 class="mt-8 mb-4">{{ subject }}</h3>
-  <div class="card mb-8 animate-fade-in" style="animation-delay: 0.1s; padding: 0; overflow: hidden;">
-    <div class="table-wrapper" style="overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead style="background-color: var(--primary-light);">
-          <tr>
-            <th style="padding: 1rem;">Student Name</th>
-            <th style="padding: 1rem;">Admission Number</th>
-            <th style="padding: 1rem;">Percentage</th>
-            <th style="padding: 1rem;">Grading</th>
-            <th style="padding: 1rem; text-align: center;">Recommendation</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for record in records %}
-          <tr style="border-bottom: 1px solid #E2E8F0;">
-            <td style="padding: 1rem; font-weight: 600; color: var(--text-main);">{{ record.learner.name }}</td>
-            <td style="padding: 1rem; color: var(--text-muted);">{{ record.learner.admission_number }}</td>
-            <td style="padding: 1rem;">{{ record.perf.score }}%</td>
-            <td style="padding: 1rem;">
-                <span class="badge badge-primary">{{ record.perf.grade }}</span>
-            </td>
-            <td style="padding: 1rem; text-align: center;">
-               <a href="/recommendations/{{ record.learner.id }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.875rem;">View Recommendation</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% else %}
+        <div class="text-muted" style="font-size: 0.875rem;">No recent assessments</div>
+      {% endif %}
     </div>
-  </div>
-  {% endfor %}
-{% endif %}
 
-<div class="card mb-8 animate-fade-in" style="background: var(--primary-light); animation-delay: 0.2s;">
-  <h3 class="mb-4">Teacher Insights</h3>
-  <div class="grid grid-2">
-     <div>
-       <h4 class="mb-2" style="color: var(--primary);">How to Use This Dashboard</h4>
-       <ul style="padding-left: 1.5rem; color: var(--text-muted);">
-          <li class="mb-1">Monitor student assessment completion</li>
-          <li class="mb-1">Review individual student competencies and interests</li>
-          <li class="mb-1">View AI-generated course recommendations</li>
-          <li class="mb-1">Identify class-wide trends and patterns</li>
-       </ul>
-     </div>
-     <div>
-       <h4 class="mb-2" style="color: var(--primary);">Recommendation Algorithm</h4>
-       <ul style="padding-left: 1.5rem; color: var(--text-muted);">
-          <li class="mb-1"><strong>35%</strong> — Competency level matching</li>
-          <li class="mb-1"><strong>25%</strong> — Interest alignment</li>
-          <li class="mb-1"><strong>25%</strong> — Academic performance</li>
-          <li class="mb-1"><strong>15%</strong> — Career path alignment</li>
-       </ul>
-     </div>
-  </div>
+    <!-- QUICK ACTIONS -->
+    <div style="margin-bottom: 2rem;">
+      <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Quick Actions</h4>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="/assessment" class="btn btn-primary" style="font-size: 0.875rem; width: 100%;">+ New Student Assessment</a>
+        <a href="/courses" class="btn btn-secondary" style="font-size: 0.875rem; width: 100%;">Browse All Courses</a>
+      </div>
+    </div>
+
+    <hr style="margin-bottom: 1.5rem; border: 0; border-top: 1px solid #E2E8F0;">
+    
+    <a href="/teacher/logout" class="btn" style="width: 100%; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.1);">
+      Logout Account
+    </a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="card animate-fade-in mb-8" style="border-left: 5px solid var(--primary);">
+      <h1>Teacher Dashboard</h1>
+      <p class="text-muted mt-2">
+         Welcome back! Oversee your assigned grades and track students' AI-driven progress.
+      </p>
+    </div>
+
+    <section id="my-classes">
+      {% if teacher %}
+        {% if teacher.classes %}
+          <h2 class="mb-4">My Homeroom Classes</h2>
+          <div class="card mb-8 animate-fade-in" style="padding: 0; overflow: hidden; background-color: var(--card-bg);">
+            <div style="padding: 1.25rem; background-color: var(--primary-light); border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between;">
+              <div><strong>Assigned Classes:</strong> 
+                {% for cls in teacher.classes %}
+                  <span class="badge" style="background: white; color: var(--primary); border: 1px solid #c7d2fe; margin-left: 0.5rem;">{{ cls }}</span>
+                {% endfor %}
+              </div>
+              <span class="text-muted" style="font-size: 0.875rem;">{{ class_learners|length }} Students Found</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x: auto; padding: 1rem;">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th style="padding: 1rem;">Student Details</th>
+                    <th style="padding: 1rem;">Learning Style</th>
+                    <th style="padding: 1rem;">Competencies</th>
+                    <th style="padding: 1rem; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for learner in class_learners %}
+                  <tr>
+                    <td>
+                      <div style="font-weight: 700; color: var(--text-main);">{{ learner.name }}</div>
+                      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">{{ learner.admission_number }} &bull; {{ learner.grade }}</div>
+                    </td>
+                    <td>
+                      <span class="badge" style="background: var(--success-bg); color: var(--success);">{{ learner.learning_style }}</span>
+                    </td>
+                    <td style="font-size: 0.875rem;">
+                      {% if learner.competencies %}
+                        {% for comp in learner.competencies %}
+                          <div style="margin-bottom: 0.25rem;">&bull; {{ comp.area }}
+                            <span class="badge" style="background: var(--primary-light); color: var(--primary); font-size: 0.7rem; margin-left: 0.25rem; padding: 0.1rem 0.4rem;">{{ comp.score }}%</span>
+                          </div>
+                        {% endfor %}
+                      {% else %}
+                        <span class="text-muted">No competencies recorded</span>
+                      {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                       <a href="/student/{{ learner.id }}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);">Full Profile</a>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr>
+                    <td colspan="4" style="padding: 4rem; text-align: center; color: var(--text-muted);">
+                      <div style="font-size: 3rem; margin-bottom: 1rem;">&#128234;</div>
+                      No students found in your assigned classes yet.
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="subject-profiles">
+      <h2 class="mb-4">Subject Profiles</h2>
+
+      {% if not subjects_data %}
+      <div class="card text-center py-12 mb-8">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
+        <h3 class="mb-2">No Subject Records Found</h3>
+        <p class="text-muted" style="max-width: 500px; margin: 0 auto;">
+            Performance data and AI recommendations will appear here as students complete their assessments.
+        </p>
+      </div>
+      {% else %}
+        {% for subject, records in subjects_data.items() %}
+        <h3 class="mt-8 mb-4" style="color: var(--primary);">{{ subject }}</h3>
+        <div class="card mb-8 animate-fade-in" style="animation-delay: 0.1s; padding: 0.5rem; overflow: hidden; border-top: 3px solid var(--secondary);">
+          <div class="table-wrapper" style="overflow-x: auto;">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Admission Number</th>
+                  <th>Percentage</th>
+                  <th>Grading</th>
+                  <th>Performance Level</th>
+                  <th style="text-align: center;">Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for record in records %}
+                <tr>
+                  <td style="font-weight: 700; color: var(--text-main);">{{ record.learner.name }}</td>
+                  <td style="color: var(--text-muted); font-size: 0.875rem;">{{ record.learner.admission_number }}</td>
+                  <td style="font-weight: 800; color: var(--primary);">{{ record.perf.score }}%</td>
+                  <td>
+                      <span class="badge badge-primary">{{ record.perf.grade }}</span>
+                  </td>
+                  <td style="font-size: 0.875rem;">
+                     {% if record.perf.grade == 'EE' %}Exceeding Expectation
+                     {% elif record.perf.grade == 'ME' %}Meeting Expectation
+                     {% elif record.perf.grade == 'AE' %}Approaching Expectation
+                     {% elif record.perf.grade == 'BE' %}Below Expectation
+                     {% else %}{{ record.perf.grade }}{% endif %}
+                  </td>
+                  <td style="text-align: center;">
+                     <a href="/recommendations/{{ record.learner.id }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; border: 1px solid var(--primary); color: var(--primary);">View Analysis</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </section>
+
+    <section id="insights">
+      <div class="card mb-8 animate-fade-in" style="background: var(--primary-light); animation-delay: 0.2s; border: none;">
+        <h3 class="mb-4">Pedagogical Insights</h3>
+        <div class="grid-fluid">
+           <div>
+             <h4 class="mb-3" style="color: var(--primary);">Dashboard Guide</h4>
+             <ul style="padding-left: 1.5rem; color: var(--text-muted); font-size: 0.95rem;">
+                <li class="mb-2">Monitor real-time student assessment status</li>
+                <li class="mb-2">Review individual competency gaps and strengths</li>
+                <li class="mb-2">Access AI-modeled course and career pathways</li>
+             </ul>
+           </div>
+           <div>
+             <h4 class="mb-3" style="color: var(--primary);">AI Weighting Matrix</h4>
+             <div style="background: white; padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(79, 70, 229, 0.1);">
+               <p style="font-size: 0.875rem; color: var(--text-muted);">How recommendations are calculated:</p>
+               <div style="margin-top: 1rem;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                    <span>Competency Match</span>
+                    <span>35%</span>
+                  </div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 35%;"></div></div>
+                  
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                    <span>Interest Alignment</span>
+                    <span>25%</span>
+                  </div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 25%; background: var(--warning);"></div></div>
+                  
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                    <span>Academic Performance</span>
+                    <span>25%</span>
+                  </div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 25%; background: var(--success);"></div></div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                    <span>Behavior Alignment</span>
+                    <span>15%</span>
+                  </div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 15%; background: grey;"></div></div>
+               </div>
+             </div>
+           </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // SMOOTH SCROLL FOR SIDEBAR LINKS
+  document.querySelectorAll('.sidebar-nav a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        window.scrollTo({
+          top: target.offsetTop - 120,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+</script>
 {% endblock %}

@@ -10,7 +10,7 @@
   </p>
 </div>
 
-<div class="grid grid-3 animate-fade-in" style="animation-delay: 0.1s;">
+<div class="grid-fluid animate-fade-in" style="animation-delay: 0.1s;">
   <div class="card card-hover">
      <h3 class="mb-4" style="border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; display: inline-block;">Profile</h3>
      <div class="flex-col gap-2" style="font-size: 0.95rem; color: var(--text-muted);">
@@ -52,9 +52,9 @@
 </div>
 
 {% if recommendations %}
-<h2 class="mt-8 mb-4">Your Top Recommendations</h2>
+<h2 class="mt-8 mb-4">Your Recommended Pathway</h2>
 
-<div class="grid grid-3 mb-8 animate-fade-in" style="animation-delay: 0.2s;">
+<div class="grid-fluid mb-8 animate-fade-in" style="animation-delay: 0.2s;">
   <div class="card" style="background: var(--success-bg); border-color: rgba(16, 185, 129, 0.2);">
      <h3 class="mb-2" style="font-size: 1.125rem; color: #047857;">Top Strengths</h3>
      <div class="flex flex-wrap gap-2 mt-2">
@@ -84,36 +84,80 @@
 </div>
 
 <div class="animate-fade-in" style="animation-delay: 0.3s;">
-   {% for rec in recommendations.recommendations[:5] %}
-   <div class="card card-hover mb-4" style="cursor: pointer;" onclick="window.location='/recommendations/{{ learner.id }}'">
-      <div class="flex justify-between items-center">
-        <div class="flex gap-4 items-center flex-1">
-           <div class="badge-primary flex items-center justify-center p-0" style="width: 3rem; height: 3rem; border-radius: 50%; font-size: 1.25rem; font-weight: 700;">
-              {{ loop.index }}
-           </div>
-           <div>
-              <h3 class="mb-1">{{ rec.course.name }}</h3>
-              <p class="text-muted" style="font-size: 0.875rem;">
-                  <span style="font-weight: 600; color: var(--text-main);">{{ rec.course.code }}</span> • {{ rec.course.subject_area }}
-              </p>
-              <p class="mt-2" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">
-                 {{ rec.reasons[0] }}
-              </p>
-           </div>
+  {% if recommendations.pathway_recommendations %}
+    {% for pw in recommendations.pathway_recommendations[:1] %}
+    {% set icon = {'STEM': '🔬', 'Social Sciences': '🌍', 'Arts and Sports': '🎨'}.get(pw.pathway, '📘') %}
+    {% set color = {'STEM': '#4F46E5', 'Social Sciences': '#0EA5E9', 'Arts and Sports': '#F59E0B'}.get(pw.pathway, '#4F46E5') %}
+    <div class="card card-hover mb-4" style="border-left: 5px solid {{ color }}; cursor: pointer;"
+         onclick="window.location='/recommendations/{{ learner.id }}'">
+      <div class="flex justify-between items-start flex-wrap gap-4 mb-3">
+        <div class="flex items-center gap-3">
+          <div style="width:3rem;height:3rem;border-radius:12px;background:{{ color }}18;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">
+            {{ icon }}
+          </div>
+          <div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--text-main);">{{ pw.pathway }} Pathway</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;">
+              {{ pw.courses|length }} course{{ 's' if pw.courses|length != 1 else '' }} &nbsp;·&nbsp; ✦ AI Recommended
+            </div>
+          </div>
         </div>
-        <div class="text-center" style="min-width: 100px;">
-           <div style="font-size: 2.5rem; font-weight: 800; color: var(--success); line-height: 1;">{{ rec.match_score }}<span style="font-size: 1.5rem;">%</span></div>
-           <span class="badge mt-2 {% if rec.match_score >= 85 %}badge-success{% elif rec.match_score >= 70 %}badge-primary{% else %}badge-warning{% endif %}">
-              {% if rec.match_score >= 85 %}Excellent{% elif rec.match_score >= 70 %}Good{% else %}Fair{% endif %} Match
-           </span>
+        <div class="text-center" style="min-width:90px;">
+          <div style="font-size:2.1rem;font-weight:800;color:{{ color }};line-height:1;">{{ pw.pathway_score }}<span style="font-size:1.1rem;">%</span></div>
+          <span class="badge mt-1 {% if pw.pathway_score >= 80 %}badge-success{% elif pw.pathway_score >= 60 %}badge-primary{% elif pw.pathway_score >= 40 %}badge-warning{% else %}badge-error{% endif %}">
+            {% if pw.pathway_score >= 80 %}EE{% elif pw.pathway_score >= 60 %}ME{% elif pw.pathway_score >= 40 %}AE{% elif pw.pathway_score >= 20 %}BE{% else %}Maybe{% endif %}
+          </span>
         </div>
       </div>
-   </div>
-   {% endfor %}
 
-   <div class="text-center mt-8">
-     <a href="/recommendations/{{ learner.id }}" class="btn btn-primary shadow-md">View All Comprehensive Recommendations</a>
-   </div>
+      <div style="border-top:1px solid #F1F5F9;padding-top:0.6rem;">
+        <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Top Courses</div>
+        {% for rec in pw.courses[:3] %}
+        <div class="flex justify-between items-center py-1" style="border-bottom:{% if not loop.last %}1px solid #F8FAFC{% else %}none{% endif %};">
+          <div>
+            <span style="font-weight:600;color:var(--text-main);font-size:0.9rem;">{{ rec.course.name }}</span>
+            <span style="color:var(--text-muted);font-size:0.78rem;margin-left:0.4rem;">{{ rec.course.code }}</span>
+          </div>
+          <span style="font-size:0.88rem;font-weight:700;color:{{ color }};">{{ rec.match_score }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if pw.reasons %}
+      <p class="mt-2" style="color:var(--primary);font-size:0.86rem;font-weight:500;">✓ {{ pw.reasons[0] }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+  {% else %}
+    {# Fallback: flat list if pathway data unavailable #}
+    {% for rec in recommendations.recommendations[:5] %}
+    <div class="card card-hover mb-4" style="cursor: pointer;" onclick="window.location='/recommendations/{{ learner.id }}'">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-4 items-center flex-1">
+          <div class="badge-primary flex items-center justify-center p-0" style="width:3rem;height:3rem;border-radius:50%;font-size:1.25rem;font-weight:700;">{{ loop.index }}</div>
+          <div>
+            <h3 class="mb-1">{{ rec.course.name }}</h3>
+            <p class="text-muted" style="font-size:0.875rem;">
+              <span style="font-weight:600;color:var(--text-main);">{{ rec.course.code }}</span> · {{ rec.course.subject_area }}
+            </p>
+            <p class="mt-2" style="color:var(--primary);font-size:0.875rem;font-weight:500;">{{ rec.reasons[0] }}</p>
+          </div>
+        </div>
+        <div class="text-center" style="min-width:100px;">
+          <div style="font-size:2.5rem;font-weight:800;color:var(--success);line-height:1;">{{ rec.match_score }}<span style="font-size:1.5rem;">%</span></div>
+          <span class="badge mt-2 {% if rec.match_score >= 80 %}badge-success{% elif rec.match_score >= 60 %}badge-primary{% elif rec.match_score >= 40 %}badge-warning{% else %}badge-error{% endif %}">
+            {% if rec.match_score >= 80 %}EE{% elif rec.match_score >= 60 %}ME{% elif rec.match_score >= 40 %}AE{% elif rec.match_score >= 20 %}BE{% else %}Maybe{% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="text-center mt-8">
+    <a href="/recommendations/{{ learner.id }}" class="btn btn-primary shadow-md">View Full Pathway Recommendation</a>
+  </div>
 </div>
 
 {% else %}

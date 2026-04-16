@@ -4,181 +4,432 @@
 
 {% block extra_css %}
 <style>
-  .recommendation-card {
-     border-left: 4px solid var(--primary);
-     margin-bottom: 1.5rem;
-     padding: 2rem;
+  /* ── Pathway card ─────────────────────────────── */
+  .pathway-card {
+    border-radius: var(--radius-lg);
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(79,70,229,0.10);
+    border: 1px solid #E2E8F0;
   }
 
-  .match-score {
-    font-size: 3.5rem;
+  .pathway-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 2rem 2.5rem;
+    color: white;
+  }
+
+  .pathway-header.stem      { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); }
+  .pathway-header.social    { background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); }
+  .pathway-header.arts      { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+  .pathway-header.technical { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+  .pathway-header.business  { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); }
+  .pathway-header.general   { background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%); }
+
+  .pathway-score-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.35);
+    flex-shrink: 0;
+  }
+  .pathway-score-circle .score-num {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .pathway-score-circle .score-lbl {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+  }
+
+  .pathway-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    padding: 0.25rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── Pathway body ─────────────────────────────── */
+  .pathway-body {
+    padding: 0 2.5rem 2rem;
+    background: #FAFBFD;
+  }
+
+  .pathway-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1.25rem 0 1rem;
+    border-bottom: 1px solid #E2E8F0;
+  }
+
+  .pathway-reasons {
+    padding: 1rem 0 0.25rem;
+  }
+  .pathway-reasons li {
+    color: var(--text-muted);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+  .pathway-reasons li::marker { color: var(--primary); }
+
+  .pathway-career-paths {
+    margin: 1rem 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* ── Course rows ──────────────────────────────── */
+  .courses-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding-top: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .course-row {
+    background: #fff;
+    border: 1px solid #E8EDF5;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .course-row:hover { box-shadow: 0 4px 16px rgba(79,70,229,0.08); border-color: var(--primary); }
+
+  .course-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    cursor: pointer;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .course-row-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .course-rank {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .course-row-score {
+    text-align: right;
+    min-width: 80px;
+  }
+  .course-row-score .score-pct {
+    font-size: 1.35rem;
     font-weight: 800;
     color: var(--primary);
     line-height: 1;
   }
 
+  .course-detail {
+    display: none;
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid #F1F5F9;
+    animation: slideDown 0.2s ease;
+  }
+  .course-row.open .course-detail { display: block; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .match-breakdown {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin: 1.5rem 0;
+    gap: 0.75rem;
+    margin: 1rem 0;
   }
-  
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     .match-breakdown { grid-template-columns: repeat(2, 1fr); }
+    .pathway-header  { padding: 1.5rem; }
+    .pathway-body    { padding: 0 1.25rem 1.5rem; }
   }
-
   .match-item {
     text-align: center;
-    padding: 1rem;
+    padding: 0.85rem 0.5rem;
     background: #F8FAFC;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     border: 1px solid #E2E8F0;
   }
+  .match-item .val { font-size: 1.15rem; font-weight: 700; line-height: 1; }
+  .match-item .lbl { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.3rem; }
 
-  .rank-badge {
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     width: 3rem;
-     height: 3rem;
-     background: var(--primary);
-     color: white;
-     border-radius: 50%;
-     font-weight: 700;
-     font-size: 1.25rem;
-     box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  .chevron {
+    transition: transform 0.2s;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
   }
+  .course-row.open .chevron { transform: rotate(180deg); }
+
+  /* ── Summary panel ────────────────────────────── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 768px) { .summary-grid { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card animate-fade-in" style="background: var(--primary-light); border: none;">
-  <h1 style="color: var(--primary);">Your Course Recommendations</h1>
+<!-- ── Hero banner ───────────────────────────────────────────── -->
+<div class="card animate-fade-in" style="background: var(--primary-light); border: none; margin-bottom: 2rem;">
+  <h1 style="color: var(--primary);">Your Recommended Pathway</h1>
   <p class="mt-2 text-muted" style="font-size: 1.125rem;">
-     Personalized, AI-driven suggestions tailored exclusively for <strong style="color: var(--text-main);">{{ learner.name }}</strong>
+    Based on your competencies, interests, and academic performance, our AI has identified the best CBC Senior Secondary pathway for <strong style="color: var(--text-main);">{{ learner.name }}</strong>.
   </p>
-
-  <div class="grid grid-3 mt-8">
-    <div class="card card-hover" style="background: var(--success-bg); border-color: rgba(16, 185, 129, 0.2);">
-       <h3 class="mb-2" style="font-size: 1.125rem; color: #047857;">Top Strengths</h3>
-       <div class="flex flex-wrap gap-2 mt-2">
-          {% for strength in recommendations.top_strengths %}
-          <span class="badge" style="background: white; color: #047857;">{{ strength }}</span>
-          {% endfor %}
-       </div>
-    </div>
-
-    <div class="card card-hover" style="background: var(--warning-bg); border-color: rgba(245, 158, 11, 0.2);">
-      <h3 class="mb-2" style="font-size: 1.125rem; color: #B45309;">Areas to Develop</h3>
-      <div class="flex flex-wrap gap-2 mt-2">
-         {% for area in recommendations.areas_for_improvement %}
-         <span class="badge" style="background: white; color: #B45309;">{{ area }}</span>
-          {% endfor %}
-       </div>
-     </div>
-
-     <div class="card card-hover" style="background: white;">
-       <h3 class="mb-2" style="font-size: 1.125rem;">Aligned Career Paths</h3>
-       <div class="flex flex-wrap gap-2 mt-2">
-          {% for career in recommendations.career_suggestions[:3] %}
-          <span class="badge badge-primary">{{ career }}</span>
-          {% endfor %}
-       </div>
-     </div>
-  </div>
 </div>
 
-<h2 class="mt-8 mb-6">Highest Ranked AI Recommendations</h2>
-
-{% for rec in recommendations.recommendations %}
-<div class="card card-hover recommendation-card animate-fade-in" style="animation-delay: 0.{{ loop.index }}s;">
-  <div class="flex justify-between items-start mb-4 flex-wrap gap-4">
-     <div class="flex items-start gap-4 flex-1">
-        <span class="rank-badge">{{ loop.index }}</span>
-        <div>
-          <h2 class="mb-1" style="font-size: 1.75rem; color: var(--text-main);">{{ rec.course.name }}</h2>
-          <p class="text-muted" style="font-size: 0.95rem; font-weight: 500;">
-              <span style="color: var(--primary);">{{ rec.course.code }}</span> • {{ rec.course.subject_area }} • <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.1rem 0.5rem;">{{ rec.course.level }}</span>
-          </p>
-          <p class="text-muted mt-2" style="line-height: 1.5; font-size: 0.95rem;">{{ rec.course.description }}</p>
-        </div>
-     </div>
-     <div class="text-center" style="min-width: 140px;">
-        <div class="match-score">{{ rec.match_score }}<span style="font-size: 1.5rem;">%</span></div>
-        <span class="badge mt-2 {% if rec.match_score >= 85 %}badge-success{% elif rec.match_score >= 70 %}badge-primary{% else %}badge-warning{% endif %}" style="padding: 0.5rem 1rem;">
-          {% if rec.match_score >= 85 %}Excellent Match
-          {% elif rec.match_score >= 70 %}Good Match
-          {% else %}Fair Match{% endif %}
-        </span>
-     </div>
-  </div>
-
-  <div class="match-breakdown">
-    <div class="match-item">
-        <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">{{ rec.competency_match }}%</div>
-        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Competency</div>
-     </div>
-     <div class="match-item">
-        <div style="font-size: 1.25rem; font-weight: 700; color: var(--success);">{{ rec.interest_match }}%</div>
-        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Interest</div>
-     </div>
-     <div class="match-item">
-        <div style="font-size: 1.25rem; font-weight: 700; color: #7c3aed;">{{ rec.performance_match }}%</div>
-        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Performance</div>
-     </div>
-     <div class="match-item">
-        <div style="font-size: 1.25rem; font-weight: 700; color: var(--warning);">{{ rec.career_alignment }}%</div>
-        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem;">Career</div>
-     </div>
-  </div>
-
-  <div class="mt-6 mb-4">
-    <h3 class="mb-2" style="font-size: 1.125rem;">Why is this recommended?</h3>
-    <ul style="padding-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
-       {% for reason in rec.reasons %}
-       <li><strong style="color: var(--text-main);">✓</strong> {{ reason }}</li>
-       {% endfor %}
-    </ul>
-  </div>
-
-  <div class="flex flex-wrap gap-2 mt-6 pt-6" style="border-top: 1px solid #E2E8F0;">
-    <span class="badge" style="background: white; border: 1px solid #E2E8F0;">{{ rec.course.credits }} Credits</span>
-    <span class="badge" style="background: white; border: 1px solid #E2E8F0;">{{ rec.course.duration }}</span>
-    {% for skill in rec.course.skills[:3] %}
-    <span class="badge" style="background: var(--primary-light); color: var(--primary);">{{ skill }}</span>
-    {% endfor %}
-  </div>
-
-  {% if rec.course.career_paths %}
-  <div class="mt-6">
-    <strong style="font-size: 0.875rem; text-transform: uppercase; color: var(--text-muted);">Career Opportunities</strong>
+<!-- ── Strengths / Improvement / Careers ────────────────────── -->
+<div class="summary-grid animate-fade-in" style="animation-delay: 0.1s;">
+  <div class="card card-hover" style="background: var(--success-bg); border-color: rgba(16,185,129,0.2);">
+    <h3 class="mb-2" style="font-size: 1rem; color: #047857;">Top Strengths</h3>
     <div class="flex flex-wrap gap-2 mt-2">
-        {% for career in rec.course.career_paths[:4] %}
-       <span class="badge badge-warning">{{ career }}</span>
-       {% endfor %}
+      {% for s in recommendations.top_strengths %}
+      <span class="badge" style="background: white; color: #047857;">{{ s }}</span>
+      {% endfor %}
     </div>
   </div>
-  {% endif %}
-
-  {% if rec.course.prerequisites %}
-  <div class="mt-6 p-4" style="background: var(--warning-bg); border-radius: var(--radius-sm); border: 1px solid rgba(245, 158, 11, 0.2);">
-     <strong style="color: #B45309; font-size: 0.875rem; text-transform: uppercase;">Prerequisites:</strong> 
-     <span style="color: #92400E; font-size: 0.95rem; margin-left: 0.5rem;">{{ rec.course.prerequisites|join(', ') }}</span>
+  <div class="card card-hover" style="background: var(--warning-bg); border-color: rgba(245,158,11,0.2);">
+    <h3 class="mb-2" style="font-size: 1rem; color: #B45309;">Areas to Develop</h3>
+    <div class="flex flex-wrap gap-2 mt-2">
+      {% for a in recommendations.areas_for_improvement %}
+      <span class="badge" style="background: white; color: #B45309;">{{ a }}</span>
+      {% endfor %}
+    </div>
   </div>
-  {% endif %}
+  <div class="card card-hover" style="background: white;">
+    <h3 class="mb-2" style="font-size: 1rem;">Career Paths</h3>
+    <div class="flex flex-wrap gap-2 mt-2">
+      {% for c in recommendations.career_suggestions[:4] %}
+      <span class="badge badge-primary">{{ c }}</span>
+      {% endfor %}
+    </div>
+  </div>
 </div>
-{% endfor %}
 
-<div class="card text-center mt-8 animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border: none; padding: 4rem 2rem;">
+<!-- ── Pathway Recommendations ───────────────────────────────── -->
+<h2 class="mb-6">Your Recommended Pathway</h2>
+
+{% for pw in recommendations.pathway_recommendations %}
+{% set css_class = {
+  'STEM': 'stem',
+  'Social Sciences': 'social',
+  'Arts and Sports': 'arts'
+}.get(pw.pathway, 'general') %}
+
+<div class="pathway-card animate-fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
+
+  <!-- Pathway Header -->
+  <div class="pathway-header {{ css_class }}">
+    <div style="flex: 1; min-width: 0;">
+      <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:0.25rem 0.85rem;font-size:0.78rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.75rem;color:white;">
+        ✦ AI Recommended Pathway
+      </div>
+      <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: white;">
+        {{ pw.pathway }} Pathway
+      </h2>
+      <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem;">
+        {{ pw.courses | length }} course{{ 's' if pw.courses | length != 1 else '' }} in this pathway
+      </p>
+    </div>
+    <div class="pathway-score-circle">
+      <span class="score-num">{{ pw.pathway_score }}</span>
+      <span class="score-lbl">% Match</span>
+    </div>
+  </div>
+
+  <!-- Pathway Body -->
+  <div class="pathway-body">
+    <!-- Fit label -->
+    <div class="pathway-meta">
+      <span class="badge
+        {% if pw.pathway_score >= 80 %}badge-success
+        {% elif pw.pathway_score >= 60 %}badge-primary
+        {% elif pw.pathway_score >= 40 %}badge-warning
+        {% else %}badge-error{% endif %}"
+        style="font-size: 0.875rem; padding: 0.4rem 1rem;">
+        {% if pw.pathway_score >= 80 %}EE
+        {% elif pw.pathway_score >= 60 %}ME
+        {% elif pw.pathway_score >= 40 %}AE
+        {% elif pw.pathway_score >= 20 %}BE
+        {% else %}Maybe{% endif %}
+      </span>
+      {% for cp in pw.career_paths[:4] %}
+      <span class="badge" style="background: white; border: 1px solid #E2E8F0; color: var(--text-muted);">{{ cp }}</span>
+      {% endfor %}
+    </div>
+
+    <!-- Reasons -->
+    {% if pw.reasons %}
+    <div class="pathway-reasons">
+      <ul style="padding-left: 1.25rem;">
+        {% for r in pw.reasons %}
+        <li>{{ r }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Courses in this pathway -->
+    <div class="courses-label mt-4">Courses in this Pathway</div>
+
+    {% for rec in pw.courses %}
+    <div class="course-row" id="cr-{{ pw.pathway | replace(' ', '-') }}-{{ loop.index }}"
+         onclick="toggleCourse(this)">
+
+      <div class="course-row-header">
+        <div class="course-row-left">
+          <div class="course-rank">{{ loop.index }}</div>
+          <div style="min-width: 0;">
+            <div style="font-weight: 700; color: var(--text-main); font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              {{ rec.course.name }}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">
+              <span style="color: var(--primary); font-weight: 600;">{{ rec.course.code }}</span>
+              &nbsp;·&nbsp;{{ rec.course.subject_area }}
+              &nbsp;·&nbsp;{{ rec.course.level }}
+            </div>
+          </div>
+        </div>
+        <div class="course-row-score">
+          <div class="score-pct">{{ rec.match_score }}<span style="font-size: 0.9rem;">%</span></div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.04em;">{% if rec.match_score >= 80 %}EE{% elif rec.match_score >= 60 %}ME{% elif rec.match_score >= 40 %}AE{% elif rec.match_score >= 20 %}BE{% else %}Maybe{% endif %}</div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+
+      <!-- Expanded detail -->
+      <div class="course-detail">
+        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1rem;">
+          {{ rec.course.description }}
+        </p>
+
+        <div class="match-breakdown">
+          <div class="match-item">
+            <div class="val" style="color: var(--primary);">{{ rec.competency_match }}%</div>
+            <div class="lbl">Competency</div>
+          </div>
+          <div class="match-item">
+            <div class="val" style="color: var(--success);">{{ rec.interest_match }}%</div>
+            <div class="lbl">Interest</div>
+          </div>
+          <div class="match-item">
+            <div class="val" style="color: var(--warning);">{{ rec.career_alignment }}%</div>
+            <div class="lbl">Career</div>
+          </div>
+          <div class="match-item">
+            <div class="val" style="color: #7c3aed;">{{ rec.performance_match }}%</div>
+            <div class="lbl">Performance</div>
+          </div>
+        </div>
+
+        {% if rec.reasons %}
+        <ul style="padding-left: 1.25rem; color: var(--text-muted); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem;">
+          {% for reason in rec.reasons %}
+          <li><strong style="color: var(--primary);">✓</strong> {{ reason }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ rec.course.exams }} Exams</span>
+          <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ rec.course.duration }}</span>
+          {% for skill in rec.course.skills[:3] %}
+          <span class="badge" style="background: var(--primary-light); color: var(--primary);">{{ skill }}</span>
+          {% endfor %}
+        </div>
+
+        {% if rec.course.career_paths %}
+        <div class="mt-3">
+          <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Career Opportunities</span>
+          <div class="flex flex-wrap gap-2 mt-1">
+            {% for career in rec.course.career_paths[:4] %}
+            <span class="badge badge-warning">{{ career }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if rec.course.prerequisites %}
+        <div class="mt-3 p-3" style="background: var(--warning-bg); border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.2); font-size: 0.875rem;">
+          <strong style="color: #B45309;">Prerequisites:</strong>
+          <span style="color: #92400E; margin-left: 0.4rem;">{{ rec.course.prerequisites | join(', ') }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %} {# end courses loop #}
+  </div> {# end pathway-body #}
+</div> {# end pathway-card #}
+{% endfor %} {# end pathway loop #}
+
+<!-- ── CTA ──────────────────────────────────────────────────── -->
+<div class="card text-center mt-8 animate-fade-in"
+     style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border: none; padding: 4rem 2rem;">
   <h2 class="mb-4" style="color: white;">Empower Your Academic Journey</h2>
   <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; font-size: 1.125rem;">
-     These recommendations represent the clearest pathway to maximizing your potential. Discuss these insights with educators to map out your personalized educational track.
+    These pathways represent the clearest tracks to maximising your potential. Share these insights with your educators to map your personalised educational journey.
   </p>
   <div class="flex flex-wrap justify-center gap-4">
-     <a href="/courses" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Browse All Courses</a>
-     <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Retake Assessment</a>
-     <a href="/student/{{ learner.id }}" class="btn" style="background: white; color: var(--primary);">View Dashboard</a>
+    <a href="/courses" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Browse All Courses</a>
+    <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Retake Assessment</a>
+    <a href="/student/{{ learner.id }}" class="btn" style="background: white; color: var(--primary);">View Dashboard</a>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function toggleCourse(el) {
+    el.classList.toggle('open');
+  }
+</script>
 {% endblock %}

@@ -10,7 +10,7 @@
   </p> 
 </div>
 
-<div class="grid grid-3 animate-fade-in" style="animation-delay: 0.1s;">
+<div class="grid-fluid animate-fade-in" style="animation-delay: 0.1s;">
   {% for course in courses %}
   <div class="card card-hover flex-col justify-between" style="border-top: 4px solid var(--primary);">
      <div>
@@ -24,7 +24,7 @@
 
        <div class="flex flex-wrap gap-2 mb-4">
          <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ course.level }}</span>
-         <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ course.credits }} Credits</span>
+         <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ course.exams }} Exams</span>
          <span class="badge" style="background: #F8FAFC; border: 1px solid #E2E8F0;">{{ course.duration }}</span>
        </div>
 

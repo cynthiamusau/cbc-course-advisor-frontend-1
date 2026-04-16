@@ -3,10 +3,10 @@
 {% block title %}Home - CBC Course Advisor{% endblock %}
 
 {% block content %}
-<div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+<div class="home-layout">
   
   <!-- LEFT SIDEBAR -->
-  <div class="sidebar-nav card animate-fade-in" style="flex: 1; min-width: 250px; max-width: 300px; padding: 1.5rem; position: sticky; top: 100px;">
+  <div class="sidebar-nav card animate-fade-in">
     <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Quick Links</h3>
     
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -32,16 +32,15 @@
   </div>
 
   <!-- MAIN CONTENT -->
-  <div style="flex: 3; min-width: 300px;">
-    <div class="card animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; text-align: center; padding: 4rem 2rem; border-radius: 1rem; margin-bottom: 4rem; border: none; box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.2);">
-      <h1 style="color: white; font-size: 3rem; margin-bottom: 1rem;">AI-Based CBC Course Advisor</h1>
-      <p style="color: rgba(255,255,255,0.9); font-size: 1.25rem; max-width: 600px; margin: 0 auto 2rem auto;">
-        Intelligent course recommendations powered by machine learning algorithms tailored for the CBC curriculum.
+  <div class="main-content" style="flex: 4;">
+    <div class="card animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; text-align: center; padding: clamp(2rem, 8vw, 6rem) 2rem; border-radius: 1.5rem; margin-bottom: 4rem; border: none; box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.4);">
+      <h1 style="color: white; font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 1.5rem; line-height: 1.1; text-shadow: 0 4px 15px rgba(0,0,0,0.2);">AI-Based CBC<br>Course Advisor</h1>
+      <p style="color: rgba(255,255,255,0.9); font-size: clamp(1.1rem, 2vw, 1.5rem); max-width: 800px; margin: 0 auto 3rem auto; line-height: 1.6; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+        Intelligent course recommendations powered by machine learning algorithms tailored specifically for the CBC curriculum.
       </p>
-      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-         <a href="/student/login" class="btn" style="background: white; color: var(--primary);">Student Login</a>
-         <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Take Assessment</a>
-         <a href="/courses" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">Browse Courses</a>
+      <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+         <a href="/student/login" class="btn" style="background: white; color: var(--primary); padding: 1rem 2.5rem; font-size: 1.1rem;">Student Login</a>
+         <a href="/assessment" class="btn" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px); padding: 1rem 2.5rem; font-size: 1.1rem;">Take Assessment</a>
       </div>
     </div>
 
@@ -55,7 +54,7 @@
         <div class="card card-hover text-center">
            <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
            <h3 class="mb-1">Competency Analysis</h3>
-           <p class="text-muted">Evaluates your skill levels across different subject areas from Beginner to Expert.</p>
+           <p class="text-muted">Evaluates your skill levels across different subject areas from Beginning to Exceeding Expectation.</p>
         </div>
 
         <div class="card card-hover text-center">

@@ -3,42 +3,73 @@
 {% block title %}Admin Login - CBC Course Advisor{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 4rem auto;">
-  <div class="card animate-fade-in" style="padding: 3rem 2rem;">
-    <div class="text-center mb-4">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
-      <h2>Admin Portal</h2>
-      <p class="mt-2 text-muted">Secure access to manage the system</p>
+<div class="container" style="display: flex; justify-content: center; align-items: center;">
+  <div class="login-split-card animate-fade-in">
+    <!-- Left side: Image -->
+    <div class="login-image-side" style="background-image: url('{{ url_for('static', filename='images/classroom_2.jpg') }}');">
+      <div class="login-image-overlay" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%);">
+        <h3>Admin Portal</h3>
+        <p>Maintain the integrity and excellence of our educational recommendation system.</p>
+      </div>
     </div>
-    
-    {% if error %}
-    <div class="badge badge-danger" style="display: block; text-align: center; margin-bottom: 1.5rem; padding: 0.75rem;">
-      {{ error }}
-    </div>
-    {% endif %}
 
-    <form method="POST" action="/admin/login">
-       <div class="form-group">
-          <label for="username">Admin Username</label>
-          <input type="text" id="username" name="username" placeholder="e.g., admin" required>
-       </div>
-       
-       <div class="form-group mb-4">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="••••••••" required>
-       </div>
-       
-       <button type="submit" class="btn btn-primary" style="width: 100%; background: #0f172a;">
-          Secure Sign In
-       </button>
-    </form>
-    
-    <div class="text-center" style="margin-top: 2rem; border-top: 1px solid #E2E8F0; padding-top: 1.5rem;">
-       <p style="font-size: 0.875rem; color: var(--text-muted);">
-          Default credentials:<br>
-          Username: <strong>admin</strong><br>
-          Password: <strong>admin123</strong>
-       </p>
+    <!-- Right side: Login Form -->
+    <div class="login-form-side">
+      <div class="text-center mb-4">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+        <h2>Secure Login</h2>
+        <p class="mt-2 text-muted">System Administration</p>
+      </div>
+      
+      {% if error %}
+      <div class="badge badge-danger" style="display: block; text-align: center; margin-bottom: 1.5rem; padding: 0.75rem;">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="/admin/login">
+         <div class="form-group mb-4">
+            <label for="username">Admin Username</label>
+            <input type="text" id="username" name="username" placeholder="e.g., admin" required class="input">
+         </div>
+         
+         <div class="form-group mb-6">
+            <label for="password">Password</label>
+            <div class="password-input-group">
+               <input type="password" id="password" name="password" placeholder="••••••••" required class="input">
+               <button type="button" class="password-toggle" onclick="togglePassword('password')" title="Toggle visibility">
+                <span id="password-toggle-icon">👁️</span>
+               </button>
+            </div>
+            <a href="#" class="forgot-password" onclick="alert('Please contact the system administrator or check the server documentation to reset the admin password.')">Forgot Password?</a>
+         </div>
+         
+         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-weight: 600;">
+            Secure Sign In
+         </button>
+      </form>
+      
+      <script>
+        function togglePassword(id) {
+          const input = document.getElementById(id);
+          const icon = document.getElementById(id + '-toggle-icon');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.innerText = '🔒';
+          } else {
+            input.type = 'password';
+            icon.innerText = '👁️';
+          }
+        }
+      </script>
+      
+      <div class="text-center" style="margin-top: 2rem; border-top: 1px solid #E2E8F0; padding-top: 1.5rem;">
+         <p style="font-size: 0.875rem; color: var(--text-muted);">
+            Default credentials:<br>
+            Username: <strong>admin</strong><br>
+            Password: <strong>admin123</strong>
+         </p>
+      </div>
     </div>
   </div>
 </div>

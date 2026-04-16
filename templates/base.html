@@ -14,22 +14,33 @@
         <span style="font-size: 1.5rem;">🎓</span> 
         CBC Course Advisor
       </a>
-      <nav class="nav-links">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav-links" id="navLinks">
         <a href="/">Home</a>
         <a href="/student/login">Student Login</a>
         <a href="/assessment">Take Assessment</a>
         <a href="/courses">Browse Courses</a>
         {% if session.get('teacher_logged_in') %}
-          <a href="/teacher">Teacher Dashboard</a>
+          <a href="/teacher">Teacher Portal</a>
           <a href="/teacher/logout" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
+        {% elif session.get('admin_logged_in') %}
+          <a href="/admin">Admin Portal</a>
+          <a href="/admin/logout" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
+        {% elif session.get('student_logged_in') %}
+          <a href="/student/{{ session.get('student_id') }}">Student Portal</a>
+          <a href="/student/logout" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
         {% else %}
-          <a href="/teacher/login" class="btn btn-primary" style="padding: 0.5rem 1rem;">Teacher Portal</a>
+          <a href="/teacher/login" class="btn btn-primary" style="padding: 0.5rem 1rem;">Portal Access</a>
         {% endif %}
       </nav>
     </div>
   </header>
 
-  <main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <main class="container" style="padding-top: 2rem; padding-bottom: 4rem; flex: 1;">
     {% block content %}{% endblock %}
   </main>
 
@@ -42,6 +53,24 @@
      </div>
   </footer>
 
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        // Toggle icon state if needed
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+          navLinks.classList.remove('active');
+        }
+      });
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

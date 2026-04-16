@@ -3,29 +3,51 @@
 {% block title %}Student Login - CBC Course Advisor{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 4rem auto;">
-  <div class="card animate-fade-in" style="padding: 3rem 2rem;">
-    <div class="text-center mb-6">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🧑‍🎓</div>
-      <h2>Student Portal</h2>
-      <p class="mt-2 text-muted">Access your personalized learning path</p>
-    </div>
-    
-    <div id="errorAlert" style="display: none; background: var(--danger-bg); color: var(--danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; text-align: center; font-weight: 500;">
+<div class="container" style="display: flex; justify-content: center; align-items: center;">
+  <div class="login-split-card animate-fade-in">
+    <!-- Left side: Image -->
+    <div class="login-image-side" style="background-image: url('{{ url_for('static', filename='images/children_puzzle.jpg') }}'); flex: 1;">
+      <div class="login-image-overlay" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.7) 0%, rgba(79, 70, 229, 0.7) 100%);">
+        <h3>Student Portal</h3>
+        <p>Unlock your potential and discover the best learning path for your future.</p>
+      </div>
     </div>
 
-    <form id="loginForm">
-       <div class="form-group mb-4">
-          <label for="admissionNumber">Admission Number</label>
-          <input type="text" id="admissionNumber" placeholder="e.g., ADM123456" required>
-       </div>
-       
-       <button type="submit" class="btn btn-primary shadow-md" style="width: 100%;">Secure Login</button>
-    </form>
-    
-    <div class="text-center mt-6 pt-6" style="border-top: 1px solid #E2E8F0;">
-      <p class="text-muted mb-4" style="font-size: 0.875rem;">Don't have a profile verified yet?</p>
-      <a href="/assessment" class="btn btn-secondary" style="width: 100%;">Take Placement Assessment</a>
+    <!-- Right side: Login Form -->
+    <div class="login-form-side" style="flex: 1.2;">
+      <div class="text-center mb-6">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🧑‍🎓</div>
+        <h2>Welcome Back</h2>
+        <p class="mt-2 text-muted">Sign in to your learning dashboard</p>
+      </div>
+      
+      <div id="errorAlert" style="display: none; background: var(--danger-bg); color: var(--danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; text-align: center; font-weight: 500;">
+      </div>
+
+      <form id="loginForm">
+         <div class="form-group mb-4">
+            <label for="admissionNumber">Admission Number</label>
+            <input type="text" id="admissionNumber" placeholder="e.g., ADM123456" required style="padding: 1rem;">
+         </div>
+         
+         <div class="form-group mb-6">
+            <label for="schoolCode">School Code</label>
+            <select id="schoolCode" required style="padding: 1rem;">
+               <option value="">Select your school</option>
+               {% for school in schools %}
+               <option value="{{ school.code }}">{{ school.name }} ({{ school.code }})</option>
+               {% endfor %}
+            </select>
+         </div>
+         
+         <button type="submit" class="btn btn-primary shadow-md" style="width: 100%; padding: 1rem;">Secure Login</button>
+         <a href="#" class="forgot-password" onclick="alert('Please check your school ID card or contact your class teacher to retrieve your admission number.')">Forgot Admission Number?</a>
+      </form>
+      
+      <div class="text-center mt-6 pt-6" style="border-top: 1px solid #E2E8F0;">
+        <p class="text-muted mb-4" style="font-size: 0.875rem;">New student?</p>
+        <a href="/assessment" class="btn btn-secondary" style="width: 100%;">Take Placement Assessment</a>
+      </div>
     </div>
   </div>
 </div>
@@ -37,6 +59,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
    e.preventDefault();
    
    const admissionNumber = document.getElementById('admissionNumber').value;
+   const schoolCode = document.getElementById('schoolCode').value;
    const errorAlert = document.getElementById('errorAlert');
    
    try {
@@ -45,7 +68,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
           headers: {
              'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ admissionNumber: admissionNumber })
+          body: JSON.stringify({ 
+             admissionNumber: admissionNumber,
+             schoolCode: schoolCode
+          })
       });
       
       const result = await response.json();

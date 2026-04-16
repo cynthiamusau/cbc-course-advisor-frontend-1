@@ -157,7 +157,7 @@
 
 {% block content %}
 <div class="card animate-fade-in mb-8" style="background: var(--primary-light); border: none; text-align: center;">
-  <h1 style="color: var(--primary);">Intelligent AI Assessment</h1>
+  <h1 style="color: var(--primary);">Student Assessment</h1>
   <p class="text-muted mt-2" style="font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
      Tell us about your skills, interests, and goals to unlock tailored CBC course pathways. We require 5 steps to establish an accurate profile.
   </p>
@@ -183,7 +183,7 @@
     </div>
     <div class="step" id="step5-indicator">
        <div class="step-number">5</div><br>
-       <span style="font-size: 0.875rem;">Career Goals</span>
+       <span style="font-size: 0.875rem;">Behavior</span>
     </div>
   </div>
 
@@ -194,19 +194,32 @@
        <div class="grid grid-2">
          <div class="form-group">
             <label for="name">Full Name *</label>
-            <input type="text" id="name" placeholder="John Doe" required>
+            <input type="text" id="name" placeholder="e.g., Cynthia Musau" required>
          </div>
          <div class="form-group">
             <label for="admissionNumber">Admission Number *</label>
             <input type="text" id="admissionNumber" placeholder="ADM123456" required>
          </div>
          <div class="form-group">
-            <label for="grade">Current Grade *</label>
-            <select id="grade" required>
-               <option value="">Select your grade</option>
-               <option value="Grade 7">Grade 7</option>
-               <option value="Grade 8">Grade 8</option>
-               <option value="Grade 9">Grade 9</option>
+            <label for="schoolCode">School Code *</label>
+            <select id="schoolCode" required>
+               <option value="">Select your school</option>
+               {% for school in schools %}
+               <option value="{{ school.code }}">{{ school.name }} ({{ school.code }})</option>
+               {% endfor %}
+            </select>
+         </div>
+         <div class="form-group">
+            <label for="grade">Current Grade</label>
+            <input type="text" id="grade" value="Grade 9" readonly disabled style="background:#f1f5f9; color:#64748b; width:100%; padding:0.75rem; border:1px solid #E2E8F0; border-radius:8px;">
+        </div>
+        <div class="form-group">
+           <label for="academicTerm">Academic Term *</label>
+           <select id="academicTerm" required style="width:100%; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: 8px;">
+              <option value="">Select Term</option>
+              <option value="Term 1">Term 1</option>
+              <option value="Term 2">Term 2</option>
+              <option value="Term 3">Term 3</option>
            </select>
         </div>
         <div class="form-group">
@@ -241,74 +254,35 @@
        <div id="interestsList"></div>
     </div>
 
-    <!-- Step 4: Academic Performance -->
-    <div class="form-section" id="step4">
+     <div class="form-section" id="step4">
        <h2 class="mb-2">4. Academic Performance</h2>
        <p class="text-muted mb-4">
           Provide recent scores in relevant subjects to refine system accuracy.
        </p>
        
        <div id="performanceList" class="mb-4"></div>
-       
+    </div>
+
+    <!-- Step 5: Behavior -->
+    <div class="form-section" id="step5">
+       <h2 class="mb-2">5. Student Behavior</h2>
+       <p class="text-muted mb-4">
+          Rate the student's behavior and conduct in school.
+       </p>
        <div class="card" style="background: #F8FAFC; border: 1px dashed #CBD5E1; box-shadow: none;">
-         <h3 class="mb-4" style="font-size: 1.125rem;">Add a Record</h3>
-         <div class="grid grid-2">
-            <div class="form-group">
-               <label for="perfSubject">Subject</label>
-               <input type="text" id="perfSubject" placeholder="e.g., Mathematics">
-            </div>
-            <div class="form-group">
-               <label for="perfScore">Score Percentage (%)</label>
-               <input type="number" id="perfScore" min="0" max="100" placeholder="0-100">
-            </div>
-            <div class="form-group">
-               <label for="perfTerm">Academic Term</label>
-               <select id="perfTerm">
-                  <option value="">Select Term</option>
-                  <option value="Term 1">Term 1</option>
-                  <option value="Term 2">Term 2</option>
-                  <option value="Term 3">Term 3</option>
-               </select>
-            </div>
+         <div class="form-group">
+            <label for="behaviorRating">General Conduct & Behavior Level</label>
+            <select id="behaviorRating" required class="input" style="width: 100%; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: 8px;">
+               <option value="">Select Rating</option>
+               <option value="Excellent">Excellent</option>
+               <option value="Good">Good</option>
+               <option value="Satisfactory">Satisfactory</option>
+               <option value="Needs Improvement">Needs Improvement</option>
+            </select>
          </div>
-         <button type="button" class="btn btn-secondary mt-2" onclick="addPerformance()">
-            + Add Subject Record
-         </button>
        </div>
     </div>
 
-    <!-- Step 5: Career Aspirations & Pathway -->
-    <div class="form-section" id="step5">
-       <h2 class="mb-2">5. Career Aspirations & Pathway</h2>
-       <p class="text-muted mb-4">
-          Select your intended pathway and long-term occupational goals.
-       </p>
-       
-       <div class="form-group mb-6">
-          <label for="pathway">Select Pathway *</label>
-          <select id="pathway" required>
-             <option value="">Select a Pathway</option>
-             <option value="STEM">STEM – Science, Technology, Engineering, Mathematics</option>
-             <option value="Social Sciences">Social Sciences</option>
-             <option value="Arts and Sports Science">Arts and Sports Science</option>
-          </select>
-       </div>
-       
-       <div id="careersList" class="flex flex-wrap gap-2 mb-6"></div>
-       
-       <div class="form-group">
-          <label for="careerInput">Add Custom Career Goal</label>
-          <div class="flex gap-4">
-             <input type="text" id="careerInput" placeholder="e.g., Software Architect" style="flex: 1;">
-             <button type="button" class="btn btn-secondary" onclick="addCareer()">Add</button>
-          </div>
-       </div>
-       
-       <div class="mt-8 border-t border-gray-200 pt-6">
-          <p class="mb-4 font-semibold text-muted" style="font-size: 0.875rem; text-transform: uppercase;">Popular Career Tracks</p>
-          <div class="subject-buttons" id="popularCareers"></div>
-       </div>
-    </div>
 
     <div class="btn-group">
        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none; padding: 0.75rem 2rem;">
