@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Student Dashboard - CBC Course Advisor{% endblock %}
+{% block title %}Student Dashboard - CBC Path Advisor{% endblock %}
 
 {% block content %}
 <div class="card animate-fade-in mb-8" style="background: var(--primary-light); border: none;">
@@ -15,7 +15,7 @@
      <h3 class="mb-4" style="border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; display: inline-block;">Profile</h3>
      <div class="flex-col gap-2" style="font-size: 0.95rem; color: var(--text-muted);">
         <p><strong style="color: var(--text-main);">Grade:</strong> <span class="badge badge-primary">{{ learner.grade }}</span></p>
-        <p><strong style="color: var(--text-main);">Admission:</strong> {{ learner.admission_number }}</p>
+        <p><strong style="color: var(--text-main);">Student Number:</strong> {{ learner.admission_number }}</p>
         <p><strong style="color: var(--text-main);">Learning Style:</strong> {{ learner.learning_style }}</p>
      </div>
   </div>

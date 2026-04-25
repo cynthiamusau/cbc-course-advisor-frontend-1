@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Teacher Dashboard - CBC Course Advisor{% endblock %}
+{% block title %}Teacher Dashboard - CBC Path Advisor{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -114,7 +114,19 @@
 
   <!-- MAIN CONTENT -->
   <main class="main-content">
+    <div id="teacher-announcements" style="display: none; margin-bottom: 2rem;">
+        <!-- Announcement Container -->
+        <div class="card" style="background: #fffbeb; border-left: 5px solid #f59e0b; padding: 1rem;">
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem;">📢</span>
+                <h3 style="font-size: 1rem; color: #92400e; margin: 0;">System Notice</h3>
+            </div>
+            <div id="announcement-content" style="color: #92400e; font-size: 0.95rem;"></div>
+        </div>
+    </div>
+
     <div class="card animate-fade-in mb-8" style="border-left: 5px solid var(--primary);">
+
       <h1>Teacher Dashboard</h1>
       <p class="text-muted mt-2">
          Welcome back! Oversee your assigned grades and track students' AI-driven progress.
@@ -205,9 +217,7 @@
               <thead>
                 <tr>
                   <th>Student Name</th>
-                  <th>Admission Number</th>
-                  <th>Percentage</th>
-                  <th>Grading</th>
+                  <th>Student Number</th>
                   <th>Performance Level</th>
                   <th style="text-align: center;">Recommendation</th>
                 </tr>
@@ -217,10 +227,6 @@
                 <tr>
                   <td style="font-weight: 700; color: var(--text-main);">{{ record.learner.name }}</td>
                   <td style="color: var(--text-muted); font-size: 0.875rem;">{{ record.learner.admission_number }}</td>
-                  <td style="font-weight: 800; color: var(--primary);">{{ record.perf.score }}%</td>
-                  <td>
-                      <span class="badge badge-primary">{{ record.perf.grade }}</span>
-                  </td>
                   <td style="font-size: 0.875rem;">
                      {% if record.perf.grade == 'EE' %}Exceeding Expectation
                      {% elif record.perf.grade == 'ME' %}Meeting Expectation
@@ -260,27 +266,21 @@
                <div style="margin-top: 1rem;">
                   <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
                     <span>Competency Match</span>
-                    <span>35%</span>
+                    <span>40%</span>
                   </div>
-                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 35%;"></div></div>
-                  
-                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
-                    <span>Interest Alignment</span>
-                    <span>25%</span>
-                  </div>
-                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 25%; background: var(--warning);"></div></div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 40%;"></div></div>
                   
                   <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
                     <span>Academic Performance</span>
-                    <span>25%</span>
+                    <span>40%</span>
                   </div>
-                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 25%; background: var(--success);"></div></div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 40%; background: var(--success);"></div></div>
 
                   <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
-                    <span>Behavior Alignment</span>
-                    <span>15%</span>
+                    <span>Interest Alignment</span>
+                    <span>20%</span>
                   </div>
-                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 15%; background: grey;"></div></div>
+                  <div class="progress-container mb-3" style="height: 6px;"><div class="progress-bar" style="width: 20%; background: var(--warning);"></div></div>
                </div>
              </div>
            </div>
@@ -306,5 +306,18 @@
       }
     });
   });
+  // Initial Load
+  window.onload = async () => {
+    // Fetch Announcements
+    try {
+        const res = await fetch('/api/admin/announcements');
+        const data = await res.json();
+        if (data.success && data.announcements.length > 0) {
+            const latest = data.announcements[0];
+            document.getElementById('announcement-content').textContent = latest.content;
+            document.getElementById('teacher-announcements').style.display = 'block';
+        }
+    } catch (e) { console.error('Error loading announcements'); }
+  };
 </script>
 {% endblock %}

@@ -1,6 +1,21 @@
-// CBC Course Advisor - Assessment Form JavaScript
+// CBC Path Advisor - Assessment Form JavaScript
 let currentStep = 1;
-const totalSteps = 5; // Step 5 is Behavior
+const totalSteps = 4; // Step 5 Behavior removed
+
+function togglePasswordVisibility(inputId, button) {
+  const input = document.getElementById(inputId);
+  const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+  
+  if (input.type === 'password') {
+      input.type = 'text';
+      button.innerHTML = eyeOffIcon;
+  } else {
+      input.type = 'password';
+      button.innerHTML = eyeIcon;
+  }
+}
+
 
 const subjectAreas = [
    'English',
@@ -27,7 +42,80 @@ let academicPerformance = [];
 // Initialize the form
 document.addEventListener('DOMContentLoaded', function() {
     initializeSubjectButtons();
+    
+    // Handle pre-fill from URL (if coming from signup)
+    const urlParams = new URLSearchParams(window.location.search);
+    const adm = urlParams.get('admissionNumber');
+    const school = urlParams.get('schoolCode');
+    
+    if (adm) document.getElementById('admissionNumber').value = adm;
+    if (school) {
+        // Find the school name for the pre-filled code
+        const options = document.querySelectorAll('.search-option');
+        let schoolName = '';
+        options.forEach(opt => {
+            if (opt.getAttribute('data-code') === school) {
+                schoolName = opt.getAttribute('data-name');
+            }
+        });
+        selectOption(school, schoolName || school);
+    }
+
+    // Close options when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.searchable-select')) {
+            document.getElementById('schoolOptions').classList.remove('active');
+        }
+    });
 });
+
+function showOptions() {
+    document.getElementById('schoolOptions').classList.add('active');
+}
+
+function filterOptions() {
+    const filter = document.getElementById('schoolCodeSearch').value.toLowerCase();
+    const options = document.getElementById('schoolOptions');
+    const items = options.getElementsByClassName('search-option');
+    let hasVisible = false;
+
+    for (let i = 0; i < items.length; i++) {
+        const name = items[i].getAttribute('data-name').toLowerCase();
+        const code = items[i].getAttribute('data-code').toLowerCase();
+        if (name.includes(filter) || code.includes(filter)) {
+            items[i].style.display = 'flex';
+            hasVisible = true;
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+    options.classList.toggle('active', hasVisible || filter === '');
+
+    // Auto-select if there is an exact code match
+    if (filter.length >= 3) {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].getAttribute('data-code').toLowerCase() === filter) {
+                selectOption(items[i].getAttribute('data-code'), items[i].getAttribute('data-name'));
+                break;
+            }
+        }
+    }
+}
+
+function selectOption(code, name) {
+    document.getElementById('schoolCode').value = code;
+    document.getElementById('schoolCodeSearch').value = `${name} (${code})`;
+    document.getElementById('schoolOptions').classList.remove('active');
+    
+    // Auto-prefix student number if empty or mismatch
+    const usernameInput = document.getElementById('admissionNumber');
+    if (usernameInput) {
+        if (usernameInput.value === '' || !usernameInput.value.startsWith(code)) {
+            usernameInput.value = code + '-';
+            usernameInput.focus();
+        }
+    }
+}
 
 function initializeSubjectButtons() {
   const compButtons = document.getElementById('addCompetencyButtons');
@@ -67,7 +155,7 @@ function addCompetency(area) {
   
   if (!academicPerformance.find(p => p.subject === area)) {
       const currentTerm = document.getElementById('academicTerm') ? document.getElementById('academicTerm').value : 'Term 1';
-      academicPerformance.push({ subject: area, grade: 'ME', score: 62, term: currentTerm || 'Term 1' });
+      academicPerformance.push({ subject: area, grade: '', score: '', term: currentTerm || 'Term 1' });
       updatePerformanceList();
   }
   
@@ -178,6 +266,17 @@ function addPerformance() {
   updatePerformanceList();
 }
 
+function updatePerformanceLevel(index, level) {
+  let score = 0;
+  if (level === 'EE') score = 88;
+  else if (level === 'ME') score = 62;
+  else if (level === 'AE') score = 37;
+  else if (level === 'BE') score = 12;
+  
+  academicPerformance[index].score = score;
+  academicPerformance[index].grade = level;
+}
+
 function updatePerformanceList() {
   const list = document.getElementById('performanceList');
   list.innerHTML = '';
@@ -187,12 +286,22 @@ function updatePerformanceList() {
     div.style.background   = '#f9fafb';
     div.style.marginBottom = '0.5rem';
     div.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+          <div style="flex-grow: 1;">
              <strong>${perf.subject}</strong><br>
              <span style="font-size: 0.875rem; color: #6b7280;">
-                Grade ${perf.grade} • ${perf.score}% • ${perf.term}
+                Term <strong style="color: var(--primary);">${perf.term}</strong>
              </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+             <label style="font-size: 0.875rem; color: #4b5563;">Level:</label>
+             <select class="input" onchange="updatePerformanceLevel(${index}, this.value)" style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                <option value="" disabled ${!perf.grade ? 'selected' : ''}>Select performance level</option>
+                <option value="EE" ${perf.grade === 'EE' ? 'selected' : ''}>Exceeding Expectation (EE)</option>
+                <option value="ME" ${perf.grade === 'ME' ? 'selected' : ''}>Meeting Expectation (ME)</option>
+                <option value="AE" ${perf.grade === 'AE' ? 'selected' : ''}>Approaching Expectation (AE)</option>
+                <option value="BE" ${perf.grade === 'BE' ? 'selected' : ''}>Below Expectation (BE)</option>
+             </select>
           </div>
           <button type="button" onclick="removePerformance(${index})"
                 style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.25rem;">×</button>
@@ -257,13 +366,12 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
      admissionNumber:    document.getElementById('admissionNumber').value,
      grade:              document.getElementById('grade').value,
      learningStyle:      document.getElementById('learningStyle').value,
+     password:           document.getElementById('password') ? document.getElementById('password').value : '',
      schoolCode:         document.getElementById('schoolCode').value,
      competencies:       competencies,
      interests:          interests,
-     academicPerformance: academicPerformance,
-     behavior:           document.getElementById('behaviorRating').value
-     // pathway and careerAspirations intentionally omitted —
-     // the system automatically recommends the best pathway
+     academicPerformance: academicPerformance
+     // pathway and careerAspirations intentionally omitted
   };
 
   // Show loading overlay

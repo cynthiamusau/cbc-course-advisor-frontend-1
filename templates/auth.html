@@ -1,0 +1,647 @@
+{% extends "base.html" %}
+
+{% block title %}Authentication - CBC Path Advisor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 2rem;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid #E2E8F0;
+    }
+
+    .auth-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #4338CA 100%);
+        padding: 3rem 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .auth-header h2 {
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-tabs {
+        display: flex;
+        background: #F8FAFC;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .auth-tab {
+        flex: 1;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-muted);
+        transition: var(--transition);
+        border-bottom: 2px solid transparent;
+    }
+
+    .auth-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        background: white;
+    }
+
+    .auth-body {
+        padding: 2.5rem;
+    }
+
+    .auth-section {
+        display: none;
+    }
+
+    .auth-section.active {
+        display: block;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .role-toggle {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem;
+        background: #F1F5F9;
+        border-radius: var(--radius-md);
+    }
+
+    .role-option {
+        flex: 1;
+        padding: 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .role-option.active {
+        background: white;
+        color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #E2E8F0;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .form-footer a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Password Toggle Styles */
+    .password-wrapper {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        z-index: 10;
+        transition: var(--transition);
+    }
+
+    .password-toggle:hover {
+        color: var(--primary);
+    }
+
+    /* Searchable Dropdown Styles */
+    .searchable-select {
+        position: relative;
+        width: 100%;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #E2E8F0;
+        border-radius: var(--radius-md);
+        outline: none;
+        transition: var(--transition);
+        background: white;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .options-container {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 250px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #E2E8F0;
+        border-top: none;
+        border-bottom-left-radius: var(--radius-md);
+        border-bottom-right-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        display: none;
+    }
+
+    .options-container.active {
+        display: block;
+    }
+
+    .search-option {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #F1F5F9;
+        font-size: 0.875rem;
+    }
+
+    .search-option:last-child {
+        border-bottom: none;
+    }
+
+    .search-option:hover {
+        background: #F8FAFC;
+    }
+
+    .search-option .school-code {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: inline-block;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn.loading {
+        opacity: 0.8;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card animate-fade-in">
+        <div class="auth-header">
+            <div id="header-icon" style="font-size: 3.5rem; margin-bottom: 1rem;">🔐</div>
+            <h2 id="header-title">Welcome Back</h2>
+            <p id="header-subtitle" style="color: #FFFFFF; font-weight: 500; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Sign in to your account to continue</p>
+        </div>
+
+        <div class="auth-tabs">
+            <div class="auth-tab active" id="login-tab" onclick="switchAuthMode('login')">Log In</div>
+            <div class="auth-tab" id="signup-tab" onclick="switchAuthMode('signup')">Sign Up</div>
+        </div>
+
+        <div class="auth-body">
+            <div id="authAlert" style="display: none; background: #FEF2F2; color: #EF4444; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; text-align: center; font-size: 0.875rem; font-weight: 500; border: 1px solid #FEE2E2;">
+            </div>
+
+            <!-- Role Selector -->
+            <div class="role-toggle">
+                <div class="role-option active" id="role-student" onclick="setRole('student')">🎓 Student</div>
+                <div class="role-option" id="role-teacher" onclick="setRole('teacher')">👩‍🏫 Teacher</div>
+            </div>
+
+            <!-- Login Section -->
+            <div id="login-section" class="auth-section active">
+                <form id="loginForm">
+                    <input type="hidden" id="login-role" value="student">
+                    <div class="form-group mb-4">
+                        <label for="login-username" id="username-label">Student Number</label>
+                        <input type="text" id="login-username" placeholder="Enter Student Number" required style="padding: 0.75rem 1rem;">
+                    </div>
+                    
+                    <div class="form-group mb-4" id="school-code-group">
+                        <label for="login-school-search">School Code</label>
+                        <div class="searchable-select">
+                            <input type="text" id="login-school-search" class="search-input" placeholder="Search by name or code..." onfocus="showOptions('login')" onkeyup="filterOptions('login')">
+                            <input type="hidden" id="login-school" value="">
+                            <div id="login-options" class="options-container">
+                                {% for school in schools %}
+                                <div class="search-option" onclick="selectOption('login', '{{ school.code }}', '{{ school.name }}')" data-name="{{ school.name }}" data-code="{{ school.code }}">
+                                    <strong>{{ school.name }}</strong>
+                                    <span class="school-code">{{ school.code }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-6">
+                        <label for="login-password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="Enter password" required style="padding: 0.75rem 2.8rem 0.75rem 1rem; width: 100%;">
+                            <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem;">
+                        Sign In
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Don't have an account? <a href="#" onclick="switchAuthMode('signup')">Create account</a>
+                </div>
+            </div>
+
+            <!-- Signup Section -->
+            <div id="signup-section" class="auth-section">
+                <p class="text-center mb-6" style="color: var(--text-muted);">To sign up kindly fill the form below</p>
+                <form id="signupForm">
+                    <input type="hidden" id="signup-role" value="student">
+                    
+                    <div class="form-group mb-4" id="signup-school-group">
+                        <label for="signup-school-search">School Code</label>
+                        <div class="searchable-select">
+                            <input type="text" id="signup-school-search" class="search-input" placeholder="Search by name or code..." onfocus="showOptions('signup')" onkeyup="filterOptions('signup')">
+                            <input type="hidden" id="signup-school" value="">
+                            <div id="signup-options" class="options-container">
+                                {% for school in schools %}
+                                <div class="search-option" onclick="selectOption('signup', '{{ school.code }}', '{{ school.name }}')" data-name="{{ school.name }}" data-code="{{ school.code }}">
+                                    <strong>{{ school.name }}</strong>
+                                    <span class="school-code">{{ school.code }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="signup-username" id="signup-username-label">Student Number</label>
+                        <input type="text" id="signup-username" name="username" placeholder="Enter Student Number" required style="padding: 0.75rem 1rem;">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="signup-password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signup-password" name="password" placeholder="Enter password" required style="padding: 0.75rem 2.8rem 0.75rem 1rem; width: 100%;">
+                            <button type="button" class="password-toggle" onclick="togglePassword('signup-password', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-6">
+                        <label for="signup-confirm">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signup-confirm" placeholder="Confirm password" required style="padding: 0.75rem 2.8rem 0.75rem 1rem; width: 100%;">
+                            <button type="button" class="password-toggle" onclick="togglePassword('signup-confirm', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem;">
+                        Sign Up
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Already have account? <a href="#" onclick="switchAuthMode('login')">Log In</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentMode = 'login';
+    let currentRole = 'student';
+
+    function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.innerHTML = eyeOffIcon;
+        } else {
+            input.type = 'password';
+            button.innerHTML = eyeIcon;
+        }
+    }
+
+    function switchAuthMode(mode) {
+        currentMode = mode;
+        
+        // Hide all options containers when switching modes
+        document.querySelectorAll('.options-container').forEach(c => c.classList.remove('active'));
+        
+        // Update Tabs
+        document.getElementById('login-tab').classList.toggle('active', mode === 'login');
+        document.getElementById('signup-tab').classList.toggle('active', mode === 'signup');
+        
+        document.getElementById('login-section').classList.toggle('active', mode === 'login');
+        document.getElementById('signup-section').classList.toggle('active', mode === 'signup');
+        
+        // Update Header
+        const title = document.getElementById('header-title');
+        const subtitle = document.getElementById('header-subtitle');
+        const icon = document.getElementById('header-icon');
+        
+        if (mode === 'signup') {
+            title.textContent = 'Create Account';
+            subtitle.textContent = 'Join the CBC Path Advisor platform';
+            subtitle.style.color = '#FFFFFF';
+            icon.textContent = '📝';
+        } else {
+            title.textContent = 'Welcome Back';
+            subtitle.textContent = 'Sign in to your account to continue';
+            subtitle.style.color = '#FFFFFF';
+            icon.textContent = '🔐';
+        }
+        
+        // Clear alerts
+        document.getElementById('authAlert').style.display = 'none';
+    }
+
+    function setRole(role) {
+        currentRole = role;
+        
+        // Update selection UI
+        document.getElementById('role-student').classList.toggle('active', role === 'student');
+        document.getElementById('role-teacher').classList.toggle('active', role === 'teacher');
+        
+        // Update hidden inputs
+        document.getElementById('login-role').value = role;
+        document.getElementById('signup-role').value = role;
+        
+        // Update labels and placeholders
+        const labels = [
+            document.getElementById('username-label'),
+            document.getElementById('signup-username-label')
+        ];
+        const inputs = [
+            document.getElementById('login-username'),
+            document.getElementById('signup-username')
+        ];
+        
+        const labelText = role === 'student' ? 'Student Number' : 'Teacher Email';
+        const placeholderText = role === 'student' ? 'Enter Student Number' : 'cynthiamusau@gmail.com';
+        
+        labels.forEach(l => l.textContent = labelText);
+        inputs.forEach(i => i.placeholder = placeholderText);
+
+        // Hide/Show school code for signup
+        const signupSchoolGroup = document.getElementById('signup-school-group');
+        if (signupSchoolGroup) {
+            signupSchoolGroup.style.display = role === 'student' ? 'none' : 'block';
+        }
+    }
+
+    // Searchable Dropdown Logic
+    function showOptions(prefix) {
+        const options = document.getElementById(prefix + '-options');
+        // Hide other containers first
+        document.querySelectorAll('.options-container').forEach(c => {
+            if (c.id !== prefix + '-options') c.classList.remove('active');
+        });
+        options.classList.add('active');
+    }
+
+    function filterOptions(prefix) {
+        const input = document.getElementById(prefix + '-school-search');
+        const filter = input.value.toLowerCase();
+        const options = document.getElementById(prefix + '-options');
+        const items = options.getElementsByClassName('search-option');
+        
+        let hasVisible = false;
+        for (let i = 0; i < items.length; i++) {
+            const name = items[i].getAttribute('data-name').toLowerCase();
+            const code = items[i].getAttribute('data-code').toLowerCase();
+            if (name.includes(filter) || code.includes(filter)) {
+                items[i].style.display = 'block';
+                hasVisible = true;
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+        options.classList.toggle('active', hasVisible || filter === '');
+        
+        // Auto-select if there is an exact code match
+        if (filter.length >= 3) {
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].getAttribute('data-code').toLowerCase() === filter) {
+                    selectOption(prefix, items[i].getAttribute('data-code'), items[i].getAttribute('data-name'));
+                    break;
+                }
+            }
+        }
+    }
+
+    function selectOption(prefix, code, name) {
+        document.getElementById(prefix + '-school').value = code;
+        document.getElementById(prefix + '-school-search').value = `${name} (${code})`;
+        document.getElementById(prefix + '-options').classList.remove('active');
+        
+        // Auto-prefix student number if role is student
+        if (currentRole === 'student') {
+            const usernameInput = document.getElementById(prefix + '-username');
+            if (usernameInput) {
+                // If it's empty or doesn't match the new code, update it
+                if (usernameInput.value === '' || !usernameInput.value.startsWith(code)) {
+                    usernameInput.value = code + '-';
+                    usernameInput.focus();
+                }
+            }
+        }
+    }
+
+    // Close options when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.searchable-select')) {
+            document.querySelectorAll('.options-container').forEach(c => c.classList.remove('active'));
+        }
+    });
+
+    // Login Handler
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const alertBox = document.getElementById('authAlert');
+        const originalText = submitBtn.innerHTML;
+        
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        const schoolCode = document.getElementById('login-school').value;
+        const role = currentRole;
+        
+        if (!username || !password) {
+            alertBox.textContent = 'Username and password are required.';
+            alertBox.style.display = 'block';
+            return;
+        }
+
+        if (role === 'student' && !schoolCode) {
+            alertBox.textContent = 'Please select your school from the list.';
+            alertBox.style.display = 'block';
+            return;
+        }
+        
+        try {
+            submitBtn.innerHTML = '<span class="spinner"></span> Logging in...';
+            submitBtn.classList.add('loading');
+            
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, schoolCode, role: currentRole })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = result.redirectUrl || (currentRole === 'student' ? `/student/${result.learnerId}` : '/teacher');
+            } else {
+                alertBox.textContent = result.error;
+                alertBox.style.display = 'block';
+            }
+        } catch (error) {
+            alertBox.textContent = 'Connection error: ' + error.message;
+            alertBox.style.display = 'block';
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.classList.remove('loading');
+        }
+    });
+
+    // Signup Handler
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const alertBox = document.getElementById('authAlert');
+        const originalText = submitBtn.innerHTML;
+
+        const username = document.getElementById('signup-username').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const confirm = document.getElementById('signup-confirm').value;
+        let schoolCode = document.getElementById('signup-school').value;
+        const role = currentRole; 
+
+        // If student and schoolCode is empty, try to extract from username (CBC-001-...)
+        if (role === 'student' && !schoolCode && username.includes('-')) {
+            schoolCode = username.split('-')[0];
+        }
+
+        let missing = [];
+        if (!username) missing.push("Student Number / Email");
+        if (!password) missing.push("Password");
+        if (!schoolCode) missing.push("School Identification");
+
+        if (missing.length > 0) {
+            alertBox.textContent = 'Please fill: ' + missing.join(', ');
+            alertBox.style.display = 'block';
+            return;
+        }
+
+        if (password !== confirm) {
+           alertBox.textContent = "Passwords do not match!";
+           alertBox.style.display = 'block';
+           return;
+        }
+
+        try {
+            submitBtn.innerHTML = '<span class="spinner"></span> Creating account...';
+            submitBtn.classList.add('loading');
+            
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, schoolCode, role })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                if (role === 'student') {
+                    // If student, maybe redirect to assessment or show success and go to login
+                    alertBox.style.background = '#F0FDF4';
+                    alertBox.style.color = '#166534';
+                    alertBox.style.borderColor = '#DCFCE7';
+                    alertBox.textContent = 'Registration successful! Proceeding to assessment...';
+                    alertBox.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/assessment?admissionNumber=' + encodeURIComponent(username) + '&schoolCode=' + encodeURIComponent(schoolCode);
+                    }, 1500);
+                } else {
+                    alertBox.style.background = '#F0FDF4';
+                    alertBox.style.color = '#166534';
+                    alertBox.style.borderColor = '#DCFCE7';
+                    alertBox.textContent = 'Account created successfully! You can now log in.';
+                    alertBox.style.display = 'block';
+                    setTimeout(() => switchAuthMode('login'), 2000);
+                }
+            } else {
+                alertBox.textContent = result.error;
+                alertBox.style.display = 'block';
+            }
+        } catch (error) {
+            alertBox.textContent = 'Connection error: ' + error.message;
+            alertBox.style.display = 'block';
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.classList.remove('loading');
+        }
+    });
+
+</script>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Course Assessment - CBC Course Advisor{% endblock %}
+{% block title %}Course Assessment - CBC Path Advisor{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -100,9 +100,30 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--primary);
+      background: #ef4444;
       cursor: pointer;
-      box-shadow: 0 0 0 4px var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+  }
+
+  /* Password Toggle Styles */
+  .password-wrapper {
+      position: relative;
+  }
+
+  .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #64748b;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      padding: 0;
+      z-index: 10;
   }
 
   #assessmentForm {
@@ -152,6 +173,74 @@
      color: var(--primary);
      transform: translateY(-2px);
   }
+
+  /* Searchable Dropdown CSS */
+  .searchable-select {
+      position: relative;
+      width: 100%;
+  }
+
+  .options-container {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .options-container.active {
+      display: block;
+  }
+
+  .search-option {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #F1F5F9;
+  }
+
+  .search-option:last-child {
+      border-bottom: none;
+  }
+
+  .search-option:hover {
+      background: #F8FAFC;
+  }
+
+  .search-option strong {
+      color: #1E293B;
+  }
+
+  .school-code-pill {
+      font-size: 0.75rem;
+      background: #E2E8F0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: #64748b;
+  }
+
+  .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      outline: none;
+  }
+
+  .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+  }
 </style>
 {% endblock %}
 
@@ -159,7 +248,7 @@
 <div class="card animate-fade-in mb-8" style="background: var(--primary-light); border: none; text-align: center;">
   <h1 style="color: var(--primary);">Student Assessment</h1>
   <p class="text-muted mt-2" style="font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
-     Tell us about your skills, interests, and goals to unlock tailored CBC course pathways. We require 5 steps to establish an accurate profile.
+     Tell us about your skills, interests, and goals to unlock tailored CBC course pathways. We require 4 steps to establish an accurate profile.
   </p>
 </div>
 
@@ -181,10 +270,6 @@
        <div class="step-number">4</div><br>
        <span style="font-size: 0.875rem;">Performance</span>
     </div>
-    <div class="step" id="step5-indicator">
-       <div class="step-number">5</div><br>
-       <span style="font-size: 0.875rem;">Behavior</span>
-    </div>
   </div>
 
   <form id="assessmentForm" class="card">
@@ -196,18 +281,24 @@
             <label for="name">Full Name *</label>
             <input type="text" id="name" placeholder="e.g., Cynthia Musau" required>
          </div>
-         <div class="form-group">
-            <label for="admissionNumber">Admission Number *</label>
-            <input type="text" id="admissionNumber" placeholder="ADM123456" required>
+          <div class="form-group">
+            <label for="admissionNumber">Student Number *</label>
+            <input type="text" id="admissionNumber" placeholder="Enter Student Number" required>
          </div>
          <div class="form-group">
-            <label for="schoolCode">School Code *</label>
-            <select id="schoolCode" required>
-               <option value="">Select your school</option>
-               {% for school in schools %}
-               <option value="{{ school.code }}">{{ school.name }} ({{ school.code }})</option>
-               {% endfor %}
-            </select>
+            <label for="schoolCodeSearch">School Code *</label>
+            <div class="searchable-select">
+                <input type="text" id="schoolCodeSearch" class="search-input" placeholder="Search school name or code..." onfocus="showOptions()" onkeyup="filterOptions()">
+                <input type="hidden" id="schoolCode" required>
+                <div id="schoolOptions" class="options-container">
+                    {% for school in schools %}
+                    <div class="search-option" onclick="selectOption('{{ school.code }}', '{{ school.name }}')" data-name="{{ school.name }}" data-code="{{ school.code }}">
+                        <strong>{{ school.name }}</strong>
+                        <span class="school-code-pill">{{ school.code }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
          </div>
          <div class="form-group">
             <label for="grade">Current Grade</label>
@@ -222,9 +313,19 @@
               <option value="Term 3">Term 3</option>
            </select>
         </div>
+        <div class="form-group" id="password-group">
+           <label for="password">Create Login Password</label>
+           <div class="password-wrapper">
+              <input type="password" id="password" placeholder="••••••••" style="width:100%; border: 1px solid #E2E8F0; padding: 0.75rem 2.8rem 0.75rem 0.75rem; border-radius: 8px;">
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password', this)">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+           </div>
+        </div>
         <div class="form-group">
            <label for="learningStyle">Preferred Learning Style</label>
-           <select id="learningStyle">
+           <select id="learningStyle" class="input" style="width: 100%; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: 8px;">
+              <option value="" disabled selected>Select learning style</option>
               <option value="Visual">Visual (Images, Diagrams)</option>
               <option value="Auditory">Auditory (Listening, Discussing)</option>
               <option value="Kinesthetic">Kinesthetic (Hands-on, Practices)</option>
@@ -261,26 +362,6 @@
        </p>
        
        <div id="performanceList" class="mb-4"></div>
-    </div>
-
-    <!-- Step 5: Behavior -->
-    <div class="form-section" id="step5">
-       <h2 class="mb-2">5. Student Behavior</h2>
-       <p class="text-muted mb-4">
-          Rate the student's behavior and conduct in school.
-       </p>
-       <div class="card" style="background: #F8FAFC; border: 1px dashed #CBD5E1; box-shadow: none;">
-         <div class="form-group">
-            <label for="behaviorRating">General Conduct & Behavior Level</label>
-            <select id="behaviorRating" required class="input" style="width: 100%; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: 8px;">
-               <option value="">Select Rating</option>
-               <option value="Excellent">Excellent</option>
-               <option value="Good">Good</option>
-               <option value="Satisfactory">Satisfactory</option>
-               <option value="Needs Improvement">Needs Improvement</option>
-            </select>
-         </div>
-       </div>
     </div>
 
 

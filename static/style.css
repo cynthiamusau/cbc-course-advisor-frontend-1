@@ -1,6 +1,6 @@
 /* 
 ======================================================
- CBC Course Advisor - Premium Design System
+ CBC Path Advisor - Premium Design System
 ======================================================
 */
 
@@ -8,29 +8,29 @@
 
 :root {
   /* Colors */
-  --primary: #0F172A;
-  --primary-hover: #1E293B;
-  --primary-light: #F1F5F9;
+  --primary: #008C51;      /* Kenyan Green */
+  --primary-hover: #00663B;
+  --primary-light: #E6F3EC;
   
-  --secondary: #2563EB;
-  --secondary-hover: #1D4ED8;
+  --secondary: #000000;    /* Kenyan Black */
+  --secondary-hover: #222222;
   
-  --accent: #F43F5E;
+  --accent: #BE0000;       /* Kenyan Red */
   
   --bg-color: #F8FAFC;
   --bg-card: #FFFFFF;
   
-  --text-main: #0F172A;
-  --text-muted: #64748B;
+  --text-main: #000000;
+  --text-muted: #4A5568;
   
-  --success: #10B981;
-  --success-bg: #ECFDF5;
+  --success: #008C51;
+  --success-bg: #E6F3EC;
   
-  --warning: #F59E0B;
-  --warning-bg: #FFFBEB;
+  --warning: #F6AA1C;
+  --warning-bg: #FEF6E8;
   
-  --danger: #EF4444;
-  --danger-bg: #FEF2F2;
+  --danger: #BE0000;
+  --danger-bg: #FBE6E6;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

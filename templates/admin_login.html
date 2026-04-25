@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Login - CBC Course Advisor{% endblock %}
+{% block title %}Admin Login - CBC Path Advisor{% endblock %}
 
 {% block content %}
 <div class="container" style="display: flex; justify-content: center; align-items: center;">
@@ -30,15 +30,17 @@
       <form method="POST" action="/admin/login">
          <div class="form-group mb-4">
             <label for="username">Admin Username</label>
-            <input type="text" id="username" name="username" placeholder="e.g., admin" required class="input">
+            <input type="text" id="username" name="username" placeholder="Admin Username" required class="input">
          </div>
          
          <div class="form-group mb-6">
             <label for="password">Password</label>
             <div class="password-input-group">
-               <input type="password" id="password" name="password" placeholder="••••••••" required class="input">
-               <button type="button" class="password-toggle" onclick="togglePassword('password')" title="Toggle visibility">
-                <span id="password-toggle-icon">👁️</span>
+               <input type="password" id="password" name="password" placeholder="Enter your password" required class="input">
+               <button type="button" class="password-toggle" onclick="togglePassword('password', this)" title="Toggle visibility">
+                <span id="password-toggle-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </span>
                </button>
             </div>
             <a href="#" class="forgot-password" onclick="alert('Please contact the system administrator or check the server documentation to reset the admin password.')">Forgot Password?</a>
@@ -50,15 +52,19 @@
       </form>
       
       <script>
-        function togglePassword(id) {
+        function togglePassword(id, btn) {
           const input = document.getElementById(id);
-          const icon = document.getElementById(id + '-toggle-icon');
+          const iconWrapper = document.getElementById(id + '-toggle-icon');
+          
+          const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+          const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+
           if (input.type === 'password') {
             input.type = 'text';
-            icon.innerText = '🔒';
+            iconWrapper.innerHTML = eyeOffIcon;
           } else {
             input.type = 'password';
-            icon.innerText = '👁️';
+            iconWrapper.innerHTML = eyeIcon;
           }
         }
       </script>
@@ -66,8 +72,8 @@
       <div class="text-center" style="margin-top: 2rem; border-top: 1px solid #E2E8F0; padding-top: 1.5rem;">
          <p style="font-size: 0.875rem; color: var(--text-muted);">
             Default credentials:<br>
-            Username: <strong>admin</strong><br>
-            Password: <strong>admin123</strong>
+            Username: <strong>admin19</strong><br>
+            Password: <strong>12345678</strong>
          </p>
       </div>
     </div>
